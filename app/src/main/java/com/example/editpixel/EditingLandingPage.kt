@@ -20,7 +20,7 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 class EditingLandingPage : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val bitmap:Bitmap=  intent.getParcelableExtra<Bitmap>("bitmap")!!
+        val bitmap:Bitmap= BitmapObject.bitmap
         setContent{
             EditPixelTheme {
                 Surface(

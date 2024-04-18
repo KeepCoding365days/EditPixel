@@ -1,13 +1,17 @@
 package com.example.editpixel
 
 import android.Manifest
+import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.media.Image
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -36,6 +40,14 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role.Companion.Image
+import coil.compose.AsyncImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
@@ -46,6 +58,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        imagePaths.add(Uri.parse("https://imgur.com/CT26g5p"))
         super.onCreate(savedInstanceState)
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -114,50 +127,24 @@ class MainActivity : ComponentActivity() {
                 Text("Select Images")
             }
             Button(onClick = {if(imagePaths.isNotEmpty())
-            { ){
-
+            {
+                val bitmap= ExtractBitmap(imagePaths[0])
+                val i= Intent(applicationContext,EditingLandingPage::class.java)
+                //i.putExtra("bitmap",bitmap)
+                BitmapObject.bitmap=bitmap
+                startActivity(i)
+                finish()
             }
-            }}) {
+            }) {
                 Text("Start Editing")
             }
+
     }
 }
+fun ExtractBitmap(uri: Uri):Bitmap{
+    val source= ImageDecoder.createSource(this.contentResolver,uri)
+    val bitmap= ImageDecoder.decodeBitmap(source)
+    return bitmap
+}
 
-    fun sendBitmap(path: String){
-        val bitmap= ExtractBitmap(path.toString())
-        val i = Intent(applicationContext,EditingLandingPage::class.java)
-        DrawBitmap(bitmap)
-        //i.putExtra("Bitmap",bitmap)
-        //startActivity(i)
-    }
-    @Composable
-    fun DrawBitmap(bitmap: Bitmap, modifier: Modifier = Modifier) {
-        val imageBitmap = bitmap.asImageBitmap()
-
-        Canvas(modifier = modifier.fillMaxSize()) {
-            drawIntoCanvas { canvas ->
-                canvas.nativeCanvas.drawBitmap(imageBitmap.asAndroidBitmap(), 0f, 0f, null)
-            }
-        }
-    }
-    @Composable
-    fun ImageGallery(imageUris: List<Uri>) {
-        Column {
-            for (uri in imageUris) {
-                CoilImage(uri = uri)
-            }
-        }
-    }
-
-    @Composable
-    fun CoilImage(uri: Uri, modifier: Modifier = Modifier) {
-        val painter = rememberImagePainter(data = uri, builder = {
-            crossfade(true)
-        })
-        Image(
-            painter = painter,
-            contentDescription = null,
-            modifier = modifier.size(200.dp) // Adjust size as needed
-        )
-    }
 }
