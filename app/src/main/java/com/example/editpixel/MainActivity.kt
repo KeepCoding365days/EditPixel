@@ -60,6 +60,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         imagePaths.add(Uri.parse("https://imgur.com/CT26g5p"))
         super.onCreate(savedInstanceState)
+        val helper=StorageHelper()
+        val projects=helper.ProjectList(applicationContext)
+        var i= Intent(applicationContext,LandingPage::class.java)
+        if(projects.size>0){
+            i=Intent(applicationContext,ProjectList::class.java)
+        }
+        startActivity(i)
+        finish()
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_MEDIA_IMAGES
@@ -109,10 +117,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    fun ExtractBitmap(path: String?):Bitmap {
-        val bitmap = BitmapFactory.decodeFile(path)
-        return bitmap
-    }
+
 
 
     @Composable
