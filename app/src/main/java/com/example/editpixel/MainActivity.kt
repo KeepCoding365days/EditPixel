@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.tooling.preview.Preview
 
 
 class MainActivity : ComponentActivity() {
@@ -96,6 +97,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     fun ExtractBitmap(path: String?):Bitmap {
         val bitmap = BitmapFactory.decodeFile(path)
         return bitmap
@@ -114,7 +116,7 @@ class MainActivity : ComponentActivity() {
                 Text("Select Images")
             }
             Button(onClick = {if(imagePaths.isNotEmpty())
-            { ){
+            { {
 
             }
             }}) {
@@ -122,7 +124,7 @@ class MainActivity : ComponentActivity() {
             }
     }
 }
-
+    @Composable
     fun sendBitmap(path: String){
         val bitmap= ExtractBitmap(path.toString())
         val i = Intent(applicationContext,EditingLandingPage::class.java)

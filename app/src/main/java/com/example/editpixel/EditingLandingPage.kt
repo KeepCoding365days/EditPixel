@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.editpixel.ui.theme.EditPixelTheme
 
 class EditingLandingPage : AppCompatActivity() {
