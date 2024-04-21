@@ -24,9 +24,11 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 
 class Editor : AppCompatActivity() {
@@ -121,19 +123,41 @@ class Editor : AppCompatActivity() {
                 if(saveButton){
                     Dialog(onDismissRequest =
                     { saveButton=false }){
-                        
-                        Column(){
-                            Text(text=R.string.saveOptions.toString())
-                            Button(onClick = { val helper=StorageHelper()
-                                helper.SaveImage(project_name = project_name,file_name,applicationContext,composer_bitmap)
-                            }) {
-                                Text("Save")
-                            }
-                            Button(onClick = { val helper=StorageHelper()
-                                BitmapObject.file_name=helper.AddtoProject(project_name,applicationContext,composer_bitmap)
+                        Card(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .padding(16.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment=Alignment.CenterHorizontally
+                            ) {
+                                Text(text="How would you like to save your image?",
+                                    modifier=Modifier.padding(6.dp), textAlign = TextAlign.Center)
+                                Row (horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Button(onClick = {
+                                        val helper = StorageHelper()
+                                        helper.SaveImage(
+                                            project_name = project_name,
+                                            file_name,
+                                            applicationContext,
+                                            composer_bitmap
+                                        )
+                                    }) {
+                                        Text("Save")
+                                    }
+                                    Button(onClick = {
+                                        val helper = StorageHelper()
+                                        BitmapObject.file_name = helper.AddtoProject(
+                                            project_name,
+                                            applicationContext,
+                                            composer_bitmap
+                                        )
 
-                            }) {
-                                Text("Save a copy")
+                                    }) {
+                                        Text("Save a Copy")
+                                    }
+                                }
                             }
                         }
                     }

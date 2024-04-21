@@ -106,6 +106,29 @@ class StorageHelper {
         }
         return null
     }
+    fun createProject(context: Context,name:String):Boolean{
+        val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val dir= File(storageDir,name)
+        var status:Boolean=true
+
+        if (!dir.exists() && !dir.mkdirs()) {
+            Log.e("IMAGE_SAVE", "Failed to create directory for image storage.")
+            status=false
+        }
+        return status
+    }
+    fun deleteProject(context: Context,name: String):Boolean{
+        val storagDir=context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val dir=File(storagDir,name)
+        return dir.delete()
+    }
+    fun deleteFile(context: Context,project_name: String,file_name: String):Boolean{
+        val storagDir=context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val dir=File(storagDir,project_name)
+        val file=File(dir,file_name)
+        return file.delete()
+    }
+
 
 
 }

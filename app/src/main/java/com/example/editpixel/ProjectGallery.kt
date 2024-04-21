@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.asImageBitmap
@@ -131,14 +132,38 @@ class ProjectGallery : AppCompatActivity() {
             val uris=obj.ExtractProjectUri(temp,applicationContext)
             items(uris){ uri->
                 val bitmap=ExtractBitmap(uri)
-                Image(bitmap=bitmap.asImageBitmap() , contentDescription = "images",Modifier.clickable(onClick = {
-                    BitmapObject.bitmap=bitmap
-                    BitmapObject.project_name=project_name
-                    BitmapObject.file_name=uri.lastPathSegment ?:""
-                    val i= Intent(applicationContext,Editor::class.java)
-                    startActivity(i)
-                    finish()
-                }))
+                val file_name=uri.lastPathSegment?:""
+                Box {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "images",
+                        Modifier.clickable(onClick = {
+                            BitmapObject.bitmap = bitmap
+                            BitmapObject.project_name = project_name
+                            BitmapObject.file_name = uri.lastPathSegment ?: ""
+                            val i = Intent(applicationContext, Editor::class.java)
+                            startActivity(i)
+                            finish()
+                        })
+                    )
+                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "",
+                        modifier = Modifier.clickable (
+                            onClick = {
+                                val helper=StorageHelper()
+                                helper.deleteFile(applicationContext,project_name, file_name )
+                                setContent(){
+                                    EditPixelTheme {
+                                        Surface(
+                                            modifier = Modifier,
+                                            color= Color.Black
+                                        ) {
+                                            Gallery(project_name)
+                                        }
+                                    }
+                                }
+                            }
+                        ))
+                }
             }
 
         }
@@ -147,8 +172,7 @@ class ProjectGallery : AppCompatActivity() {
         SmallFloatingActionButton(
             onClick = { check_permission()
                 launcher.launch(arrayOf("image/*"))
-                Log.d(TAG,"calling save function")
-                //savetoApp();
+
                       },
             modifier = Modifier
                 .padding(16.dp)
