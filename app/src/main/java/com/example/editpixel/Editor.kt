@@ -1,4 +1,5 @@
 package com.example.editpixel
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,23 +18,68 @@ import androidx.compose.ui.unit.dp
 import com.example.editpixel.BitmapObject
 import com.example.editpixel.R
 import com.example.editpixel.ui.theme.EditPixelTheme
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.window.Dialog
 
 class Editor : AppCompatActivity() {
+    private var ImgBitmap=BitmapObject.bitmap
+    private var project_name=BitmapObject.project_name
+    private var file_name=BitmapObject.file_name
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContent {
-            EditPixelTheme {
-                Surface {
-                    EditorUI()
+
+                    EditorUI(ImgBitmap)
                 }
-            }
-        }
+
+
     }
 
+    fun changeBitmapSaturation(source: Bitmap, saturation: Float): Bitmap {
+        val isMutable = source.isMutable
+
+        // Create a mutable copy of the bitmap if it is not mutable
+        val mutableBitmap = if (isMutable) source else source.copy(Bitmap.Config.ARGB_8888, true)
+
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint()
+
+        // Create a color matrix. This matrix will be used to adjust the saturation
+        val colorMatrix = ColorMatrix()
+
+        // Set the saturation
+        colorMatrix.setSaturation(saturation)
+
+        // Set the paint to use this color matrix
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+        // Draw the original bitmap onto the canvas using the paint with saturation adjustment
+        canvas.drawBitmap(mutableBitmap, 0f, 0f, paint)
+
+        return mutableBitmap
+    }
+
+    @Composable 
+    fun saveOptions(){
+        AlertDialog(onDismissRequest = { /*TODO*/ }, confirmButton = { /*TODO*/ })
+    }
 
     @Composable
-    fun EditorUI() {
+    fun EditorUI(bitmap:Bitmap) {
+        var composer_bitmap by remember {
+            mutableStateOf(bitmap)
+        }
         Surface(modifier = Modifier.fillMaxSize()) {
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -42,7 +88,35 @@ class Editor : AppCompatActivity() {
 
                 /* top icons row */
                 var selectedButton by remember { mutableStateOf("") }
+                var saveButton by remember {
+                    mutableStateOf(false)
+                }
+                Icon(imageVector = Icons.Filled.Done,contentDescription= "",tint=Color.Green,
+                    modifier = Modifier.clickable (onClick={
+                        saveButton=true
+                    }
+                    )
+                )
+                if(saveButton){
+                    Dialog(onDismissRequest =
+                    { saveButton=false }){
+                        
+                        Column(){
+                            Text(text=R.string.saveOptions.toString())
+                            Button(onClick = { val helper=StorageHelper()
+                                helper.SaveImage(project_name = project_name,file_name,applicationContext,ImgBitmap)
+                            }) {
+                                Text("Save")
+                            }
+                            Button(onClick = { val helper=StorageHelper()
+                                BitmapObject.file_name=helper.AddtoProject(project_name,applicationContext,ImgBitmap)
 
+                            }) {
+                                Text("Save a copy")
+                            }
+                        }
+                    }
+                }
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
@@ -72,7 +146,7 @@ class Editor : AppCompatActivity() {
                 }
                 /* center selected image */
                 Image(
-                    bitmap = BitmapObject.bitmap.asImageBitmap(),
+                    bitmap = composer_bitmap.asImageBitmap()  ,
                     contentDescription = "Selected Image",
                     modifier = Modifier
                         .weight(1f)
@@ -108,11 +182,21 @@ class Editor : AppCompatActivity() {
                     }
                 }
 
+
                 // Show sliders based on selected button
                 if (selectedButton == "Saturation") {
-                    Slider(value = saturation, onValueChange = { value -> saturation = value })
+                    Column() {
+                        Slider(value = saturation, onValueChange = { value ->
+                            saturation = value
+                        }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(composer_bitmap,saturation)
+                                }, valueRange = 0f..100f)
+                        Text(text=saturation.toString())
+                    }
                 } else if (selectedButton == "Hue") {
-                    Slider(value = hue, onValueChange = { value -> hue = value })
+                    Column() {
+                        Slider(value = hue, onValueChange = { value -> hue = value }, valueRange = 0f..100f)
+                        Text(text=saturation.toString())
+                    }
                 }
             }
         }
@@ -138,6 +222,6 @@ class Editor : AppCompatActivity() {
     @Preview
     @Composable
     fun PreviewEditorUI() {
-        EditorUI()
+        EditorUI(ImgBitmap)
     }
 }

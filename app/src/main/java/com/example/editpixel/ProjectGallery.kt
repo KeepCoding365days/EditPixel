@@ -44,23 +44,24 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
 import java.io.File
 import java.io.FileOutputStream
 
 class ProjectGallery : AppCompatActivity() {
     private val imagePaths = mutableStateListOf<Uri>()
-    lateinit var name:String
+    private var project_name:String=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        name= intent.getStringExtra("project_name").toString()
-        Log.d(TAG,"project_name"+name)
+        project_name= intent.getStringExtra("project_name").toString()
+        Log.d(TAG,"project_name"+project_name)
         setContent(){
             EditPixelTheme {
                 Surface(
                     modifier = Modifier,
                     color= Color.Black
                 ) {
-                   Gallery(name)
+                   Gallery(project_name)
                 }
             }
         }
@@ -84,7 +85,7 @@ class ProjectGallery : AppCompatActivity() {
     fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, filename: String) {
         Log.d(TAG,"Start of save")
         val obj=StorageHelper();
-        obj.AddtoProject(name,applicationContext,bitmap);
+        obj.AddtoProject(project_name,applicationContext,bitmap);
     }
     fun ExtractBitmap(uri: Uri):Bitmap{
         val source= ImageDecoder.createSource(this.contentResolver,uri)
@@ -132,6 +133,8 @@ class ProjectGallery : AppCompatActivity() {
                 val bitmap=ExtractBitmap(uri)
                 Image(bitmap=bitmap.asImageBitmap() , contentDescription = "images",Modifier.clickable(onClick = {
                     BitmapObject.bitmap=bitmap
+                    BitmapObject.project_name=project_name
+                    BitmapObject.file_name=uri.lastPathSegment ?:""
                     val i= Intent(applicationContext,Editor::class.java)
                     startActivity(i)
                     finish()

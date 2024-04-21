@@ -13,10 +13,40 @@ import java.io.FileOutputStream
 class StorageHelper {
 
     fun StorageHelper(){}
-    fun AddtoProject(name:String,context: Context, bitmap: Bitmap){
+    fun AddtoProject(name:String,context: Context, bitmap: Bitmap):String{
         val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         Log.d(ContentValues.TAG,"folderName"+name)
         val dir= File(storageDir,name)
+        var file=""
+        Log.d(ContentValues.TAG,"storage directory found")
+        if (dir != null) {
+            if (!dir.exists() && !dir.mkdirs()) {
+                Log.e("IMAGE_SAVE", "Failed to create directory for image storage.")
+                return file
+            }
+            var count=dir.listFiles()?.size ?:0
+            count=count+1
+            file=count.toString()
+            file= "$file.png"
+            val imageFile = File(dir, file)
+            try {
+                FileOutputStream(imageFile).use { fos ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                }
+                Log.d("IMAGE_SAVE", "Image saved to ${imageFile.absolutePath}")
+            } catch (e: Exception) {
+                Log.d(ContentValues.TAG,"can't save file")
+                e.printStackTrace()
+            }
+        } else {
+            Log.e("IMAGE_SAVE", "External Storage is not available or not mounted.")
+        }
+        return file
+    }
+    fun SaveImage(project_name:String,file_name:String,context: Context, bitmap: Bitmap){
+        val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        Log.d(ContentValues.TAG,"folderName"+project_name)
+        val dir= File(storageDir,project_name)
 
         Log.d(ContentValues.TAG,"storage directory found")
         if (dir != null) {
@@ -24,11 +54,8 @@ class StorageHelper {
                 Log.e("IMAGE_SAVE", "Failed to create directory for image storage.")
                 return
             }
-            var count=dir.listFiles()?.size ?:0
-            count=count+1
-            var file=count.toString()
-            file= "$file.png"
-            val imageFile = File(dir, file)
+
+            val imageFile = File(dir, file_name)
             try {
                 FileOutputStream(imageFile).use { fos ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
