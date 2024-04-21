@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity() {
             Button(onClick = {if(imagePaths.isNotEmpty())
             {
                 val bitmap= ExtractBitmap(imagePaths[0])
-                val i= Intent(applicationContext,EditingLandingPage::class.java)
+                val i= Intent(applicationContext,Editor::class.java)
                 //i.putExtra("bitmap",bitmap)
                 BitmapObject.bitmap=bitmap
                 startActivity(i)

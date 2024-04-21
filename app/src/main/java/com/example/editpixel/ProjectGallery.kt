@@ -98,9 +98,6 @@ class ProjectGallery : AppCompatActivity() {
         for( path in  list){
             Log.d(TAG,"Inside loop")
             val bitmap:Bitmap=ExtractBitmap(path)
-            val i= Intent(applicationContext,EditingLandingPage::class.java)
-            //i.putExtra("bitmap",bitmap)
-
             Log.d(TAG,"saveImagecalled")
             saveImageToExternalStorage(applicationContext,bitmap,path.toString());
         }

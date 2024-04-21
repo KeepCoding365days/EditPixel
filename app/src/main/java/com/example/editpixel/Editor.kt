@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class Editor : AppCompatActivity() {
     private var ImgBitmap=BitmapObject.bitmap
@@ -182,7 +183,8 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         var composer_bitmap by remember {
             mutableStateOf(bitmap)
         }
-        Surface(modifier = Modifier.fillMaxSize()) {
+        Surface(modifier = Modifier.fillMaxSize(),
+            color = Color.Black) {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -249,32 +251,32 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         .padding(8.dp)
                         .horizontalScroll(rememberScrollState())
                 ) {
-                    BarButton("filter", R.drawable.filters, selectedButton == "filter") {
-                        selectedButton = "filter"
+                    BarButton("Filter", R.drawable.filters, selectedButton == "Filters") {
+                        selectedButton = "Filter"
                     }
                     BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
                         selectedButton = "Crop"
                     }
                     BarButton(
-                        "foreground and background",
+                        "ForeGround",
                         R.drawable.fg,
-                        selectedButton == "foreground and background"
+                        selectedButton == "Foreground"
                     ) {
-                        selectedButton = "foreground and background"
+                        selectedButton = "Foreground"
                     }
                     BarButton(
-                        "bring to front",
+                        "Background",
                         R.drawable.fgg,
-                        selectedButton == "bring to front"
+                        selectedButton == "Background"
                     ) {
-                        selectedButton = "bring to front"
+                        selectedButton = "Background"
                     }
                     BarButton(
-                        "bring to front",
+                        "Advanced",
                         R.drawable.fgg,
-                        selectedButton == "bring to front"
+                        selectedButton == "Advanced"
                     ) {
-                        selectedButton = "bring to front"
+                        selectedButton = "Advanced"
                     }
                 }
                 /* center selected image */
@@ -307,7 +309,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         selectedButton = "Saturation"
                     }
                     BarButton(
-                        "Color",
+                        "Temprature",
                         R.drawable.brush,
                         selectedButton == "Colors"
                     ) {
@@ -316,88 +318,68 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     BarButton("Hue", R.drawable.drop, selectedButton == "Hue") {
                         selectedButton = "Hue"
                     }
-                    BarButton("brightness", R.drawable.brush, selectedButton == "brightness") {
+                    BarButton("Brightness", R.drawable.brush, selectedButton == "brightness") {
                         selectedButton = "brightness"
                     }
-                    BarButton("contrast", R.drawable.brush, selectedButton == "contrast") {
+                    BarButton("Contrast", R.drawable.brush, selectedButton == "contrast") {
                         selectedButton = "contrast"
                     }
                 }
 
-                if (selectedButton == "Color Palette") { // Assuming "Color Palette" is the text for the button
-                    Slider(value = colorTemperature,
-                        onValueChange = { newValue ->
-                            colorTemperature = newValue
-                            composer_bitmap = changeBitmapTemperature(composer_bitmap, colorTemperature)
-                        },
-                        valueRange = -100f..100f // Adjust the range as needed for your temperature scale
-                    )
+                if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Slider(
+                            value = colorTemperature,
+                            onValueChange = { newValue ->
+                                colorTemperature = newValue},
+                            onValueChangeFinished={
+                                composer_bitmap =
+                                    changeBitmapTemperature(ImgBitmap, colorTemperature)
+                            },
+                            valueRange = -100f..100f // Adjust the range as needed for your temperature scale
+                        )
+                        Text(text = String.format("%.2f", colorTemperature))
+                    }
                 }
 
-                // Show sliders based on selected button
-                if (selectedButton == "Saturation") {
-                    Column() {
+                else if (selectedButton == "Saturation") {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(value = saturation, onValueChange = { value ->
                             saturation = value
                         }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(ImgBitmap,saturation)
                                 }, valueRange = 0f..100f)
-                        Text(text=saturation.toString())
+                        Text(text=String.format("%.2f",saturation))
                     }
                 } else if (selectedButton == "Hue") {
-                    Column() {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(value = hue, onValueChange = { value -> hue = value },
                             onValueChangeFinished = {
                                 composer_bitmap=adjustHue(ImgBitmap,hue)
                             },
                             valueRange = 0f..360f, modifier = Modifier)
-                        Text(text=hue.toString())
+                        Text(text=String.format("%.2f",hue))
                     }
                 }
-                else if(selectedButton=="contrast"){
-                    Column(){
+                else if(selectedButton=="brightness"){
+                    Column(horizontalAlignment = Alignment.CenterHorizontally){
                         Slider(value = brightness, onValueChange = { value -> brightness = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
                             },
                             valueRange = -1f..1f,modifier = Modifier)
 
-                        Text(text="Brightness",modifier=Modifier.height(30.dp))
+                        Text(text=String.format("%.2f",brightness),modifier=Modifier.height(30.dp))
                     }
                 }
-                else if(selectedButton=="brightness"){
-                    Column {
+                else if(selectedButton=="contrast"){
+                    Column (horizontalAlignment = Alignment.CenterHorizontally){
                         Slider(value = contrast, onValueChange = { value -> contrast = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustContrast (ImgBitmap,contrast)
                             },
                             valueRange = -1f..1f, modifier = Modifier)
 
-                        Text(text="Contrast",modifier=Modifier.height(30.dp))
-                    }
-                }
-
-                else if(selectedButton=="Colors"){
-                    Row(modifier=Modifier.fillMaxWidth()){
-                        Text(text="Brightness",modifier=Modifier.height(30.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Slider(value = brightness, onValueChange = { value -> brightness = value },
-                            onValueChangeFinished = {
-                                composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
-                            },
-                            valueRange = -1f..1f,modifier = Modifier.height(30.dp))
-
-                        Text(text="Brightness",modifier=Modifier.height(30.dp))
-                    }
-                    Row(modifier=Modifier.fillMaxWidth()){
-                        Text(text="Contrast",modifier=Modifier.height(30.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Slider(value = contrast, onValueChange = { value -> contrast = value },
-                            onValueChangeFinished = {
-                                composer_bitmap=AdjustContrast (ImgBitmap,contrast)
-                            },
-                            valueRange = -1f..1f, modifier = Modifier.height(30.dp))
-                        
-                        Text(text="Contrast",modifier=Modifier.height(30.dp))
+                        Text(text=String.format("%.2f",contrast),modifier=Modifier.height(30.dp))
                     }
                 }
             }
@@ -406,21 +388,23 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
 
     @Composable
     fun BarButton(text: String, iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
-        Button(
+        Column( horizontalAlignment= Alignment.CenterHorizontally) {
+            Button(
 
-            onClick = onClick,
-            modifier = Modifier.padding(horizontal = 2.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent
-            )
-        ) {
-            Column() {
-                Image(
-                    painter = painterResource(iconRes),
-                    contentDescription = text,
-                    modifier = Modifier.size(40.dp)
+                onClick = onClick,
+                modifier = Modifier.padding(horizontal = 2.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent
                 )
-                Text(text, color = Color.Black)
+            ) {
+                Column() {
+                    Image(
+                        painter = painterResource(iconRes),
+                        contentDescription = text,
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Text(text)
+                }
             }
         }
     }
