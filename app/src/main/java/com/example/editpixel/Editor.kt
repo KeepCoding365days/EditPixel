@@ -43,7 +43,28 @@ class Editor : AppCompatActivity() {
 
 
     }
+    fun adjustHue(source: Bitmap, hue: Float): Bitmap {
+        val isMutable = source.isMutable
 
+        // Create a mutable copy of the bitmap if it is not mutable
+        val newBitmap = if (isMutable) source else source.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(newBitmap)
+        val paint = Paint()
+
+        // Create a color matrix and rotate it to adjust hue
+        val colorMatrix = ColorMatrix()
+        colorMatrix.setRotate(0, hue) // Red channel
+        colorMatrix.setRotate(1, hue) // Green channel
+        colorMatrix.setRotate(2, hue) // Blue channel
+
+        // Set the paint to use this color matrix
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+        // Draw the bitmap onto the canvas using the paint
+        canvas.drawBitmap(newBitmap, 0f, 0f, paint)
+
+        return newBitmap
+    }
     fun changeBitmapSaturation(source: Bitmap, saturation: Float): Bitmap {
         val isMutable = source.isMutable
 
@@ -104,12 +125,12 @@ class Editor : AppCompatActivity() {
                         Column(){
                             Text(text=R.string.saveOptions.toString())
                             Button(onClick = { val helper=StorageHelper()
-                                helper.SaveImage(project_name = project_name,file_name,applicationContext,ImgBitmap)
+                                helper.SaveImage(project_name = project_name,file_name,applicationContext,composer_bitmap)
                             }) {
                                 Text("Save")
                             }
                             Button(onClick = { val helper=StorageHelper()
-                                BitmapObject.file_name=helper.AddtoProject(project_name,applicationContext,ImgBitmap)
+                                BitmapObject.file_name=helper.AddtoProject(project_name,applicationContext,composer_bitmap)
 
                             }) {
                                 Text("Save a copy")
@@ -188,14 +209,18 @@ class Editor : AppCompatActivity() {
                     Column() {
                         Slider(value = saturation, onValueChange = { value ->
                             saturation = value
-                        }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(composer_bitmap,saturation)
+                        }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(ImgBitmap,saturation)
                                 }, valueRange = 0f..100f)
                         Text(text=saturation.toString())
                     }
                 } else if (selectedButton == "Hue") {
                     Column() {
-                        Slider(value = hue, onValueChange = { value -> hue = value }, valueRange = 0f..100f)
-                        Text(text=saturation.toString())
+                        Slider(value = hue, onValueChange = { value -> hue = value },
+                            onValueChangeFinished = {
+                                composer_bitmap=adjustHue(ImgBitmap,hue)
+                            },
+                            valueRange = 0f..360f)
+                        Text(text=hue.toString())
                     }
                 }
             }
