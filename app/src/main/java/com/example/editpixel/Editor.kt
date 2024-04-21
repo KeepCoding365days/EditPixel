@@ -24,6 +24,8 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -90,6 +92,56 @@ class Editor : AppCompatActivity() {
 
         return mutableBitmap
     }
+fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
+        val isMutable = source.isMutable
+
+        // Create a mutable copy of the bitmap if it is not mutable
+        val mutableBitmap = if (isMutable) source else source.copy(Bitmap.Config.ARGB_8888, true)
+
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint()
+
+        // Create a color matrix. This matrix will be used to adjust the saturation
+        val colorMatrix = ColorMatrix().apply {
+            setScale(brightness,brightness,brightness,1f)
+        }
+        // Set the paint to use this color matrix
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+        // Draw the original bitmap onto the canvas using the paint with saturation adjustment
+        canvas.drawBitmap(mutableBitmap, 0f, 0f, paint)
+
+        return mutableBitmap
+    }
+    fun AdjustContrast(source: Bitmap, contrast: Float): Bitmap {
+        val isMutable = source.isMutable
+
+        // Create a mutable copy of the bitmap if it is not mutable
+        val mutableBitmap = if (isMutable) source else source.copy(Bitmap.Config.ARGB_8888, true)
+
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint()
+
+        // Create a color matrix. This matrix will be used to adjust the saturation
+        val colorMatrix = ColorMatrix().apply {
+            val scale = contrast + 1f
+            val translate = -(128 * contrast) / 2
+            set(floatArrayOf(
+                scale, 0f, 0f, 0f, translate,
+                0f, scale, 0f, 0f, translate,
+                0f, 0f, scale, 0f, translate,
+                0f, 0f, 0f, 1f, 0f
+            ))
+        }
+        // Set the paint to use this color matrix
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+        // Draw the original bitmap onto the canvas using the paint with saturation adjustment
+        canvas.drawBitmap(mutableBitmap, 0f, 0f, paint)
+
+        return mutableBitmap
+    }
+
 
     @Composable 
     fun saveOptions(){
@@ -105,8 +157,8 @@ class Editor : AppCompatActivity() {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxSize()
+                //verticalArrangement = Arrangement.,
+                //modifier = Modifier.fillMaxSize()
             ) {
 
                 /* top icons row */
@@ -165,8 +217,8 @@ class Editor : AppCompatActivity() {
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
-                        .fillMaxWidth()
                         .padding(8.dp)
+                        .horizontalScroll(rememberScrollState())
                 ) {
                     BarButton("filter", R.drawable.filters, selectedButton == "filter") {
                         selectedButton = "filter"
@@ -180,6 +232,13 @@ class Editor : AppCompatActivity() {
                         selectedButton == "foreground and background"
                     ) {
                         selectedButton = "foreground and background"
+                    }
+                    BarButton(
+                        "bring to front",
+                        R.drawable.fgg,
+                        selectedButton == "bring to front"
+                    ) {
+                        selectedButton = "bring to front"
                     }
                     BarButton(
                         "bring to front",
@@ -202,28 +261,33 @@ class Editor : AppCompatActivity() {
 
                 var saturation by remember { mutableStateOf(0f) }
                 var hue by remember { mutableStateOf(0f) }
+                var brightness by remember { mutableStateOf(0f) }
+                var contrast by remember { mutableStateOf(0f) }
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(2.dp)
+                        .horizontalScroll(rememberScrollState())
                 ) {
                     BarButton("Saturation", R.drawable.hue, selectedButton == "Saturation") {
                         selectedButton = "Saturation"
                     }
                     BarButton(
-                        "Color Palette",
+                        "Color",
                         R.drawable.brush,
-                        selectedButton == "Color Palette"
+                        selectedButton == "Colors"
                     ) {
-                        selectedButton = "Color Palette"
+                        selectedButton = "Colors"
                     }
                     BarButton("Hue", R.drawable.drop, selectedButton == "Hue") {
                         selectedButton = "Hue"
                     }
-                    BarButton("Brush", R.drawable.brush, selectedButton == "Brush") {
-                        selectedButton = "Brush"
+                    BarButton("brightness", R.drawable.brush, selectedButton == "brightness") {
+                        selectedButton = "brightness"
+                    }
+                    BarButton("contrast", R.drawable.brush, selectedButton == "contrast") {
+                        selectedButton = "contrast"
                     }
                 }
 
@@ -243,8 +307,55 @@ class Editor : AppCompatActivity() {
                             onValueChangeFinished = {
                                 composer_bitmap=adjustHue(ImgBitmap,hue)
                             },
-                            valueRange = 0f..360f)
+                            valueRange = 0f..360f, modifier = Modifier)
                         Text(text=hue.toString())
+                    }
+                }
+                else if(selectedButton=="contrast"){
+                    Column(){
+                        Slider(value = brightness, onValueChange = { value -> brightness = value },
+                            onValueChangeFinished = {
+                                composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
+                            },
+                            valueRange = -1f..1f,modifier = Modifier)
+
+                        Text(text="Brightness",modifier=Modifier.height(30.dp))
+                    }
+                }
+                else if(selectedButton=="brightness"){
+                    Column {
+                        Slider(value = contrast, onValueChange = { value -> contrast = value },
+                            onValueChangeFinished = {
+                                composer_bitmap=AdjustContrast (ImgBitmap,contrast)
+                            },
+                            valueRange = -1f..1f, modifier = Modifier)
+
+                        Text(text="Contrast",modifier=Modifier.height(30.dp))
+                    }
+                }
+
+                else if(selectedButton=="Colors"){
+                    Row(modifier=Modifier.fillMaxWidth()){
+                        Text(text="Brightness",modifier=Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Slider(value = brightness, onValueChange = { value -> brightness = value },
+                            onValueChangeFinished = {
+                                composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
+                            },
+                            valueRange = -1f..1f,modifier = Modifier.height(30.dp))
+
+                        Text(text="Brightness",modifier=Modifier.height(30.dp))
+                    }
+                    Row(modifier=Modifier.fillMaxWidth()){
+                        Text(text="Contrast",modifier=Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Slider(value = contrast, onValueChange = { value -> contrast = value },
+                            onValueChangeFinished = {
+                                composer_bitmap=AdjustContrast (ImgBitmap,contrast)
+                            },
+                            valueRange = -1f..1f, modifier = Modifier.height(30.dp))
+                        
+                        Text(text="Contrast",modifier=Modifier.height(30.dp))
                     }
                 }
             }
@@ -254,17 +365,21 @@ class Editor : AppCompatActivity() {
     @Composable
     fun BarButton(text: String, iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
         Button(
+
             onClick = onClick,
             modifier = Modifier.padding(horizontal = 2.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent
             )
         ) {
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = text,
-                modifier = Modifier.size(40.dp)
-            )
+            Column() {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = text,
+                    modifier = Modifier.size(40.dp)
+                )
+                Text(text, color = Color.Black)
+            }
         }
     }
 
