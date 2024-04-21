@@ -68,6 +68,35 @@ class Editor : AppCompatActivity() {
         return mutableBitmap
     }
 
+    private fun changeBitmapTemperature(source: Bitmap, temperature: Float): Bitmap {
+        val mutableBitmap = source.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(mutableBitmap)
+        val paint = Paint()
+        val colorMatrix = ColorMatrix().apply {
+            setTemperature(temperature)
+        }
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+        canvas.drawBitmap(mutableBitmap, 0f, 0f, paint)
+        return mutableBitmap
+    }
+    private fun ColorMatrix.setTemperature(value: Float) {
+        // Assuming the value ranges from -100f (cool) to 100f (warm)
+        // Adjust the scaling to suit your specific needs. This is a basic implementation.
+        val adjustment = value / 100f
+
+        // Adjust Red, Green, Blue channels - a rudimentary approximation
+        // The higher the temperature value, the warmer the color
+        val r = if (adjustment > 0) 1f + adjustment else 1f
+        val g = 1f
+        val b = if (adjustment < 0) 1f - adjustment else 1f
+
+        set(floatArrayOf(
+            r, 0f, 0f, 0f, 0f,
+            0f, g, 0f, 0f, 0f,
+            0f, 0f, b, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        ))
+    }
     @Composable 
     fun saveOptions(){
         AlertDialog(onDismissRequest = { /*TODO*/ }, confirmButton = { /*TODO*/ })
@@ -157,7 +186,7 @@ class Editor : AppCompatActivity() {
 
                 var saturation by remember { mutableStateOf(0f) }
                 var hue by remember { mutableStateOf(0f) }
-
+                var colorTemperature by remember { mutableStateOf(0f) }
                 Row(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
@@ -182,6 +211,15 @@ class Editor : AppCompatActivity() {
                     }
                 }
 
+                if (selectedButton == "Color Palette") { // Assuming "Color Palette" is the text for the button
+                    Slider(value = colorTemperature,
+                        onValueChange = { newValue ->
+                            colorTemperature = newValue
+                            composer_bitmap = changeBitmapTemperature(composer_bitmap, colorTemperature)
+                        },
+                        valueRange = -100f..100f // Adjust the range as needed for your temperature scale
+                    )
+                }
 
                 // Show sliders based on selected button
                 if (selectedButton == "Saturation") {
