@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
             )
         } else {
             setContent {
+
                 EditPixelTheme {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
