@@ -8,9 +8,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.editpixel.BitmapObject
 import com.example.editpixel.R
 
 class EditingUI : ComponentActivity() {
@@ -40,22 +42,22 @@ fun EditorUI() {
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                BarButton("filter", R.drawable.filter, selectedButton == "filter") {
+                BarButton("filter", R.drawable.filters, selectedButton == "filter") {
                     selectedButton = "filter"
                 }
                 BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
                     selectedButton = "Crop"
                 }
-                BarButton("foreground and background", R.drawable.foregroundandbackground, selectedButton == "foreground and background") {
+                BarButton("foreground and background", R.drawable.fg, selectedButton == "foreground and background") {
                     selectedButton = "foreground and background"
                 }
-                BarButton("bring to front", R.drawable.bringtofront, selectedButton == "bring to front") {
+                BarButton("bring to front", R.drawable.fgg, selectedButton == "bring to front") {
                     selectedButton = "bring to front"
                 }
             }
             /* center selected image */
             Image(
-                painter = painterResource(id = R.drawable.editpixel),
+                bitmap=BitmapObject.bitmap.asImageBitmap(),
                 contentDescription = "Selected Image",
                 modifier = Modifier.weight(1f).fillMaxWidth()
             )
@@ -71,10 +73,10 @@ fun EditorUI() {
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                BarButton("Saturation", R.drawable.saturation, selectedButton == "Saturation") {
+                BarButton("Saturation", R.drawable.hue, selectedButton == "Saturation") {
                     selectedButton = "Saturation"
                 }
-                BarButton("Color Palette", R.drawable.colorpallete, selectedButton == "Color Palette") {
+                BarButton("Color Palette", R.drawable.brush, selectedButton == "Color Palette") {
                     selectedButton = "Color Palette"
                 }
                 BarButton("Hue", R.drawable.drop, selectedButton == "Hue") {

@@ -132,7 +132,7 @@ class ProjectGallery : AppCompatActivity() {
                 val bitmap=ExtractBitmap(uri)
                 Image(bitmap=bitmap.asImageBitmap() , contentDescription = "images",Modifier.clickable(onClick = {
                     BitmapObject.bitmap=bitmap
-                    val i= Intent(applicationContext,EditingLandingPage::class.java)
+                    val i= Intent(applicationContext,Editor::class.java)
                     startActivity(i)
                     finish()
                 }))
