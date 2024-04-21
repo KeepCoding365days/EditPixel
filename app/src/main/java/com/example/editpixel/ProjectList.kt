@@ -1,6 +1,7 @@
 package com.example.editpixel
 
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -14,6 +15,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +27,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -32,6 +35,9 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -90,7 +96,8 @@ class ProjectList : AppCompatActivity() {
     @Composable
     fun ProjectCard(name:String){
         val uri=helper.getProjectImage(applicationContext,name)
-        var bitmap=BitmapFactory.decodeResource(applicationContext.resources,R.drawable.addicon)
+        var bitmap=BitmapFactory.decodeResource(applicationContext.resources,R.drawable.brush)
+
         if (uri!=null){
             bitmap=ExtractBitmap(uri)
         }
@@ -106,15 +113,29 @@ class ProjectList : AppCompatActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(10.dp)
             ) {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    Modifier
-                        .size(size = 150.dp)
-                        .border(BorderStroke(4.dp, Color.White), CircleShape)
-                        .padding(10.dp)
-                        .clip(CircleShape)
-                )
+                Box {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        Modifier
+                            .size(size = 150.dp)
+                            .border(BorderStroke(4.dp, Color.White), CircleShape)
+                            .padding(10.dp)
+                            .clip(CircleShape)
+                    )
+                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "", modifier =
+                    Modifier.clickable (onClick = {
+                        val helper=StorageHelper()
+                        helper.deleteProject(applicationContext,name)
+                        setContent(){
+                            EditPixelTheme {
+                                Surface (modifier = Modifier) {
+                                    Projects()
+                                }
+                            }
+                        }
+                    }))
+                }
 
                 Text(
                     text = name, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Center,

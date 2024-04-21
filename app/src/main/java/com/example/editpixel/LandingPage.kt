@@ -7,6 +7,7 @@ import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -84,11 +85,30 @@ class LandingPage : AppCompatActivity() {
         val keyboardController= LocalSoftwareKeyboardController.current
         fun Project(){
             val i= Intent(applicationContext, ProjectGallery::class.java)
-            i.putExtra("project_name",inputText.value)
-            Log.d(TAG,inputText.value)
-            startActivity(i)
-            //finish()
+            val helper=StorageHelper()
+            var created=false
 
+            val projects=helper.ProjectList(applicationContext)
+            for (project in projects) {
+                if (project==inputText.value){
+                    created=true;
+                }
+            }
+            if(created){
+                Toast.makeText(this,"A project with this name already exists",Toast.LENGTH_SHORT).show()
+            }
+            else{
+                created=helper.createProject(applicationContext,inputText.value)
+                if(!created){
+                    Toast.makeText(this,"Project is not created",Toast.LENGTH_SHORT).show()
+                }
+                else{
+                    i.putExtra("project_name",inputText.value)
+                    Log.d(TAG,inputText.value)
+                    startActivity(i)
+                    finish()
+                }
+            }
         }
         AlertDialog(
             onDismissRequest = { onDismiss() },
