@@ -45,6 +45,7 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 class filter : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContent(){
             EditPixelTheme {
                 Filters(bitmap = BitmapObject,::CloseFilters)
