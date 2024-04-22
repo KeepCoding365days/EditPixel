@@ -19,6 +19,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,11 +43,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.getValue
@@ -58,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -220,78 +225,95 @@ class ProjectGallery : AppCompatActivity() {
         if(name!=null){
             temp=name
         }
-        Column (
-            modifier=Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                temp, modifier = Modifier.padding(5.dp), color = Color.White,
-                style = MaterialTheme.typography.displayMedium
-            )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    temp, modifier = Modifier.padding(5.dp), color = Color.White,
+                    style = MaterialTheme.typography.displayMedium
+                )
 
-            LazyRow(modifier = Modifier.padding(10.dp)) {
-                val obj = StorageHelper()
-                val uris = obj.ExtractProjectUri(temp, applicationContext)
-                items(uris) { uri ->
-                    val bitmap = ExtractBitmap(uri)
+                LazyColumn(modifier = Modifier.padding(10.dp),horizontalAlignment = Alignment.CenterHorizontally) {
+                    val obj = StorageHelper()
+                    val uris = obj.ExtractProjectUri(temp, applicationContext)
+                    items(uris) { uri ->
+                        val bitmap = ExtractBitmap(uri)
+                    OutlinedCard(modifier = Modifier.padding(5.dp)) {
+                        Column(modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally ) {
+                            Image(
+                                painter = BitmapPainter(bitmap.asImageBitmap()),
+                                contentDescription = "images",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clickable(onClick = {
+                                        BitmapObject.bitmap = bitmap
+                                        BitmapObject.project_name = project_name
+                                        BitmapObject.file_name = uri.lastPathSegment ?: ""
+                                        val i = Intent(applicationContext, Editor::class.java)
+                                        startActivity(i)
+                                        finish()
+                                    })
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .widthIn(max = LocalConfiguration.current.screenWidthDp.dp - 30.dp)
+                                    .heightIn(max = LocalConfiguration.current.screenHeightDp.dp - 100.dp)
 
-                    Box(modifier = Modifier.padding(10.dp)) {
-                        Image(
-                            painter = BitmapPainter( bitmap.asImageBitmap()),
-                            contentDescription = "images",
-                            contentScale=ContentScale.Crop,
-                            modifier=Modifier
-                                .clickable(onClick = {
-                                    BitmapObject.bitmap = bitmap
-                                    BitmapObject.project_name = project_name
-                                    BitmapObject.file_name = uri.lastPathSegment ?: ""
-                                    val i = Intent(applicationContext, Editor::class.java)
-                                    startActivity(i)
-                                    finish()
-                                })
-                                .clip(RoundedCornerShape(16.dp))
-                                .widthIn(max=LocalConfiguration.current.screenWidthDp.dp - 30.dp)
-                                .heightIn(max=LocalConfiguration.current.screenHeightDp.dp - 30.dp)
-
-                        )
-                        Icon(imageVector = Icons.Filled.Delete, contentDescription = "",
-                            modifier = Modifier
-                                .clickable(
-                                    onClick = {
-                                        file_name = uri.lastPathSegment ?: ""
-                                        delBtn=true
-                                        setContent() {
-                                            EditPixelTheme {
-                                                Surface(
-                                                    modifier = Modifier,
-                                                    color = Color.DarkGray
-                                                ) {
-                                                    Gallery(project_name)
-                                                }
+                            )
+                            Row(
+                                modifier = Modifier.width(LocalConfiguration.current.screenWidthDp.dp - 30.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                TextButton(onClick = {
+                                    file_name = uri.lastPathSegment ?: ""
+                                    delBtn = true
+                                    setContent() {
+                                        EditPixelTheme {
+                                            Surface(
+                                                modifier = Modifier,
+                                                color = Color.DarkGray
+                                            ) {
+                                                Gallery(project_name)
                                             }
                                         }
                                     }
-                                )
-                                .align(Alignment.TopCenter))
-                        Icon(imageVector = Icons.Filled.Send, contentDescription = "",
-                            modifier = Modifier
-                                .clickable(
+                                }, modifier = Modifier) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Delete,
+                                        contentDescription = "",
+                                        tint = Color.White,
+                                    )
+                                }
+                                TextButton(
                                     onClick = {
-                                        file_uri=uri
-                                        Log.d(TAG,"file uri is:"+file_uri)
-                                        ExportBtn=true
-                                    }
-                                )
-                                .align(Alignment.BottomCenter))
+                                        file_uri = uri
+                                        Log.d(TAG, "file uri is:" + file_uri)
+                                        ExportBtn = true
+                                    },
+                                    modifier = Modifier
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Send,
+                                        contentDescription = "",
+                                        tint = Color.White,
+                                    )
+                                }
+                            }
+                        }
                     }
+                    }
+                    (item {
+                        Button(onClick = { ProjectPage() }, modifier = Modifier) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack, contentDescription = "",
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    })
                 }
 
             }
-            Button(onClick = {ProjectPage()}, modifier = Modifier){
-                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="",
-                    modifier = Modifier.fillMaxWidth() )
-            }
-        }
+
 
 
         SmallFloatingActionButton(
@@ -301,7 +323,8 @@ class ProjectGallery : AppCompatActivity() {
                       },
             modifier = Modifier
                 .padding(16.dp)
-                .offset(300.dp, 600.dp)
+                .offset(LocalConfiguration.current.screenWidthDp.dp-70.dp,
+                    LocalConfiguration.current.screenHeightDp.dp-100.dp)
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }

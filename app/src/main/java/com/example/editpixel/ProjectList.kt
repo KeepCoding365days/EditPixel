@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
@@ -96,7 +97,8 @@ class ProjectList : AppCompatActivity() {
             },
             modifier = Modifier
                 .padding(16.dp)
-                .offset(300.dp, 600.dp)
+                .offset(LocalConfiguration.current.screenWidthDp.dp-70.dp,
+            LocalConfiguration.current.screenHeightDp.dp-100.dp)
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
