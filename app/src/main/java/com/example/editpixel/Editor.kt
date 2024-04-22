@@ -191,24 +191,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
 
     fun CallFilters(){
-        //set filters flag to true to display filter module
-        /*BitmapObject.filters = true
-        Log.d("Decode","Filters launching")
-        recreate()
-        Log.d("Decode","Filters launched")*/
+
         val i = Intent(applicationContext, filter::class.java)
         startActivity(i)
         finish()
     }
 
-    fun CloseFilters(){
-        //set filters flag to true to display filter module
-        BitmapObject.filters = false
-        Log.d("Decode","Filters launching")
-        recreate()
-        Log.d("Decode","Filters launched")
 
-    }
     fun CallBg(){
         //update it
         //val i = Intent(applicationContext, ProjectGallery::class.java)
@@ -242,16 +231,6 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
             mutableStateOf(bitmap)
         }
 
-        // launch filters module if filters option selected
-        //if(BitmapObject.filters){
-
-            //Log.d("Decode","Filters True")
-            //Filters(BitmapObject,::CloseFilters)
-        //}
-        // else show the editor panel UI
-        //else{
-
-            Log.d("Decode","Filters False")
         Surface(modifier = Modifier.fillMaxSize(),
             color = Color.DarkGray) {
 
@@ -506,7 +485,6 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 }
             }
         }
-       // }
     }
 
     @Composable

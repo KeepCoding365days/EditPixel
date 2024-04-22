@@ -11,7 +11,6 @@ object BitmapObject {
     var file_name:String=""
 
     //flag to display filters module
-    var filters:Boolean=false
     private fun createBitmap(): Bitmap {
         // Assume these dimensions and config for example purposes
         return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)

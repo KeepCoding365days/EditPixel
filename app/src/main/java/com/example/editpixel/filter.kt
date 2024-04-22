@@ -1,5 +1,6 @@
 package com.example.editpixel
 
+import android.content.Intent
 import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -53,10 +54,9 @@ class filter : AppCompatActivity() {
     }
     fun CloseFilters(){
         //set filters flag to true to display filter module
-        BitmapObject.filters = false
-        Log.d("Decode","Filters launching")
-        recreate()
-        Log.d("Decode","Filters launched")
+        val i= Intent(applicationContext,Editor::class.java)
+        startActivity(i)
+        finish()
     }
     @Composable
     fun Filters(bitmap: BitmapObject, callback: () -> Unit){
