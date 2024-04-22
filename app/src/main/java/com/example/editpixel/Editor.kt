@@ -39,7 +39,7 @@ class Editor : AppCompatActivity() {
     private var project_name=BitmapObject.project_name
     private var file_name=BitmapObject.file_name
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         setContent {
 
@@ -173,9 +173,14 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
             0f, 0f, 0f, 1f, 0f
         ))
     }
-    @Composable 
-    fun saveOptions(){
-        AlertDialog(onDismissRequest = { /*TODO*/ }, confirmButton = { /*TODO*/ })
+
+
+
+    fun BacktoProject(){
+        val i = Intent(applicationContext, ProjectGallery::class.java)
+        i.putExtra("project_name", project_name)
+        startActivity(i)
+        finish()
     }
 
     @Composable
@@ -184,7 +189,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
             mutableStateOf(bitmap)
         }
         Surface(modifier = Modifier.fillMaxSize(),
-            color = Color.Black) {
+            color = Color.DarkGray) {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -197,12 +202,45 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 var saveButton by remember {
                     mutableStateOf(false)
                 }
-                Icon(imageVector = Icons.Filled.Done,contentDescription= "",tint=Color.Green,
+                var cancelBtn by remember {
+                    mutableStateOf(false)
+                }
+
+                /*Icon(imageVector = Icons.Filled.Done,contentDescription= "",tint=Color.Green,
                     modifier = Modifier.clickable (onClick={
                         saveButton=true
                     }
                     )
-                )
+                )*/
+                Row() {
+                    TextButton(onClick = { cancelBtn=true}) {
+                        Text("Cancel")
+                    }
+                    TextButton(onClick = { saveButton = true }) {
+                        Text("Save")
+                    }
+                }
+                if(cancelBtn) {
+                    AlertDialog(onDismissRequest = { cancelBtn=false },
+                        title={
+                              Text("Are you sure to Leave editing")
+                        },
+                        confirmButton = {
+                        TextButton(onClick = {BacktoProject()  }
+
+                        ) {
+                            Text("Leave")
+                        }
+                    },
+                        dismissButton = {
+                            TextButton(onClick = {cancelBtn=false}
+                            ) {
+                                Text("Cancel")
+                            }
+                        }
+
+                    )
+                }
                 if(saveButton){
                     Dialog(onDismissRequest =
                     { saveButton=false }){
@@ -245,40 +283,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         }
                     }
                 }
-                Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .horizontalScroll(rememberScrollState())
-                ) {
-                    BarButton("Filter", R.drawable.filters, selectedButton == "Filters") {
-                        selectedButton = "Filter"
-                    }
-                    BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
-                        selectedButton = "Crop"
-                    }
-                    BarButton(
-                        "ForeGround",
-                        R.drawable.fg,
-                        selectedButton == "Foreground"
-                    ) {
-                        selectedButton = "Foreground"
-                    }
-                    BarButton(
-                        "Background",
-                        R.drawable.fgg,
-                        selectedButton == "Background"
-                    ) {
-                        selectedButton = "Background"
-                    }
-                    BarButton(
-                        "Advanced",
-                        R.drawable.fgg,
-                        selectedButton == "Advanced"
-                    ) {
-                        selectedButton = "Advanced"
-                    }
-                }
+
                 /* center selected image */
                 Image(
                     bitmap = composer_bitmap.asImageBitmap()  ,
@@ -300,7 +305,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 var colorTemperature by remember { mutableStateOf(0f) }
 
                 Row(
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    //horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
                         .padding(2.dp)
                         .horizontalScroll(rememberScrollState())
@@ -310,19 +315,46 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     }
                     BarButton(
                         "Temprature",
-                        R.drawable.brush,
+                        R.drawable.temp,
                         selectedButton == "Colors"
                     ) {
                         selectedButton = "Colors"
                     }
-                    BarButton("Hue", R.drawable.drop, selectedButton == "Hue") {
+                    BarButton("Hue", R.drawable.hue, selectedButton == "Hue") {
                         selectedButton = "Hue"
                     }
-                    BarButton("Brightness", R.drawable.brush, selectedButton == "brightness") {
+                    BarButton("Brightness", R.drawable.brightness, selectedButton == "brightness") {
                         selectedButton = "brightness"
                     }
-                    BarButton("Contrast", R.drawable.brush, selectedButton == "contrast") {
+                    BarButton("Contrast", R.drawable.contrast, selectedButton == "contrast") {
                         selectedButton = "contrast"
+                    }
+                    BarButton("Filter", R.drawable.filters, selectedButton == "Filters") {
+                        selectedButton = "Filter"
+                    }
+                    BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
+                        selectedButton = "Crop"
+                    }
+                    BarButton(
+                        "ForeGround",
+                        R.drawable.fg,
+                        selectedButton == "Foreground"
+                    ) {
+                        selectedButton = "Foreground"
+                    }
+                    BarButton(
+                        "Background",
+                        R.drawable.bg,
+                        selectedButton == "Background"
+                    ) {
+                        selectedButton = "Background"
+                    }
+                    BarButton(
+                        "Advanced",
+                        R.drawable.advanced,
+                        selectedButton == "Advanced"
+                    ) {
+                        selectedButton = "Advanced"
                     }
                 }
 
@@ -394,7 +426,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 onClick = onClick,
                 modifier = Modifier.padding(horizontal = 2.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent
+                    containerColor = if (isSelected) Color.Black else Color.Transparent
                 )
             ) {
                 Column() {

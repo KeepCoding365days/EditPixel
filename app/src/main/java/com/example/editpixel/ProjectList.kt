@@ -52,6 +52,7 @@ class ProjectList : AppCompatActivity() {
     private val helper=StorageHelper()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContent {
             EditPixelTheme {
                 Surface (modifier = Modifier) {
@@ -96,7 +97,7 @@ class ProjectList : AppCompatActivity() {
     @Composable
     fun ProjectCard(name:String){
         val uri=helper.getProjectImage(applicationContext,name)
-        var bitmap=BitmapFactory.decodeResource(applicationContext.resources,R.drawable.brush)
+        var bitmap=BitmapFactory.decodeResource(applicationContext.resources,R.drawable.logo)
 
         if (uri!=null){
             bitmap=ExtractBitmap(uri)

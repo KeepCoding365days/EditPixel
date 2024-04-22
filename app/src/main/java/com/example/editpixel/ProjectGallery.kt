@@ -53,6 +53,7 @@ class ProjectGallery : AppCompatActivity() {
     private val imagePaths = mutableStateListOf<Uri>()
     private var project_name:String=""
     override fun onCreate(savedInstanceState: Bundle?) {
+        supportActionBar?.hide()
         super.onCreate(savedInstanceState)
         project_name= intent.getStringExtra("project_name").toString()
         Log.d(TAG,"project_name"+project_name)

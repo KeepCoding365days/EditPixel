@@ -43,6 +43,7 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 class LandingPage : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide()
         setContent(){
             EditPixelTheme() {
                 Surface(
