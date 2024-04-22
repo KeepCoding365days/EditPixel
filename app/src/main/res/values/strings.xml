@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">EditPixel</string>
+    <string name="saveOptions">Select how you want to save image</string>
 </resources>
