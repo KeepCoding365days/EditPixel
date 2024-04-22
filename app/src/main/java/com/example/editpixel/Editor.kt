@@ -23,6 +23,7 @@ import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -190,11 +191,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
 
     fun CallFilters(){
-        //update it
-        //val i = Intent(applicationContext, ProjectGallery::class.java)
-        //startActivity(i)
-        //finish()
+
+        val i = Intent(applicationContext, filter::class.java)
+        startActivity(i)
+        finish()
     }
+
+
     fun CallBg(){
         //update it
         //val i = Intent(applicationContext, ProjectGallery::class.java)
@@ -221,9 +224,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
     @Composable
     fun EditorUI(bitmap:Bitmap) {
+        Log.d("Decode","UI Launched")
+
+
         var composer_bitmap by remember {
             mutableStateOf(bitmap)
         }
+
         Surface(modifier = Modifier.fillMaxSize(),
             color = Color.DarkGray) {
 
@@ -382,9 +389,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         composer_bitmap=ImgBitmap
                         selectedButton = "contrast"
                     }
-                    BarButton("Filter", R.drawable.filters, selectedButton == "Filter") {
-                        selectedButton = "Filter"
-                    }
+
+                    BarButton("Filter", R.drawable.filters, selectedButton == "Filter", {CallFilters()})
+
                     BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
                         selectedButton = "Crop"
                     }
