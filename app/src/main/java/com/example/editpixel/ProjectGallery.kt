@@ -12,7 +12,9 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,10 +41,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
@@ -52,6 +68,8 @@ import java.io.FileOutputStream
 class ProjectGallery : AppCompatActivity() {
     private val imagePaths = mutableStateListOf<Uri>()
     private var project_name:String=""
+    private var file_name=""
+    private var file_uri:Uri= Uri.EMPTY
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
@@ -61,7 +79,7 @@ class ProjectGallery : AppCompatActivity() {
             EditPixelTheme {
                 Surface(
                     modifier = Modifier,
-                    color= Color.Black
+                    color= Color.DarkGray
                 ) {
                    Gallery(project_name)
                 }
@@ -103,15 +121,101 @@ class ProjectGallery : AppCompatActivity() {
             saveImageToExternalStorage(applicationContext,bitmap,path.toString());
         }
     }
+    fun ProjectPage(){
+        val i=Intent(applicationContext,ProjectList::class.java)
+        startActivity(i)
+        finish()
+    }
+    fun deletfile(file_name:String){
+        val helper = StorageHelper()
+        helper.deleteFile(
+            applicationContext,
+            project_name,
+            file_name
+        )
+    }
+
+    fun ExportFile(uri:Uri){
+        val helper = StorageHelper()
+        Log.d(TAG,"helper called. with uri: "+uri.toString())
+        helper.exportFileToGallery(applicationContext, uri)
+        Log.d(TAG,"helper returned")
+    }
+
+
+
     @Composable
     fun Gallery(name: String?){
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
             imagePaths.clear()
             imagePaths.addAll(uris)
             savetoApp(uris)
-
+            setContent(){
+                EditPixelTheme {
+                    Surface(
+                        modifier = Modifier,
+                        color= Color.DarkGray
+                    ) {
+                        Gallery(project_name)
+                    }
+                }
+            }
         }
         var temp="a"
+
+        var delBtn by remember {
+            mutableStateOf(false)
+        }
+        var ExportBtn by remember {
+            mutableStateOf(false)
+        }
+        if(delBtn) {
+            AlertDialog(onDismissRequest = { delBtn=false },
+                title={
+                    Text("Are you sure to delete this file")
+                },
+                confirmButton = {
+                    TextButton(onClick = {deletfile(file_name)
+                        delBtn=false
+                    }
+
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {delBtn=false}
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+
+            )
+        }
+        if(ExportBtn) {
+            AlertDialog(onDismissRequest = { ExportBtn=false },
+                title={
+                    Text("Are you sure to Export this file to Gallery?")
+                },
+                confirmButton = {
+                    TextButton(onClick = {ExportFile(file_uri)
+                        ExportBtn=false
+                    }
+
+                    ) {
+                        Text("Export")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {ExportBtn=false}
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+
+            )
+        }
+
 
         if(name!=null){
             temp=name
@@ -124,46 +228,69 @@ class ProjectGallery : AppCompatActivity() {
                 temp, modifier = Modifier.padding(5.dp), color = Color.White,
                 style = MaterialTheme.typography.displayMedium
             )
-        }
-        LazyRow(modifier = Modifier.padding(10.dp)){
-            val obj=StorageHelper()
-            val uris=obj.ExtractProjectUri(temp,applicationContext)
-            items(uris){ uri->
-                val bitmap=ExtractBitmap(uri)
-                val file_name=uri.lastPathSegment?:""
-                Box {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "images",
-                        Modifier.clickable(onClick = {
-                            BitmapObject.bitmap = bitmap
-                            BitmapObject.project_name = project_name
-                            BitmapObject.file_name = uri.lastPathSegment ?: ""
-                            val i = Intent(applicationContext, Editor::class.java)
-                            startActivity(i)
-                            finish()
-                        })
-                    )
-                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "",
-                        modifier = Modifier.clickable (
-                            onClick = {
-                                val helper=StorageHelper()
-                                helper.deleteFile(applicationContext,project_name, file_name )
-                                setContent(){
-                                    EditPixelTheme {
-                                        Surface(
-                                            modifier = Modifier,
-                                            color= Color.Black
-                                        ) {
-                                            Gallery(project_name)
+
+            LazyRow(modifier = Modifier.padding(10.dp)) {
+                val obj = StorageHelper()
+                val uris = obj.ExtractProjectUri(temp, applicationContext)
+                items(uris) { uri ->
+                    val bitmap = ExtractBitmap(uri)
+
+                    Box(modifier = Modifier.padding(10.dp)) {
+                        Image(
+                            painter = BitmapPainter( bitmap.asImageBitmap()),
+                            contentDescription = "images",
+                            contentScale=ContentScale.Crop,
+                            modifier=Modifier
+                                .clickable(onClick = {
+                                    BitmapObject.bitmap = bitmap
+                                    BitmapObject.project_name = project_name
+                                    BitmapObject.file_name = uri.lastPathSegment ?: ""
+                                    val i = Intent(applicationContext, Editor::class.java)
+                                    startActivity(i)
+                                    finish()
+                                })
+                                .clip(RoundedCornerShape(16.dp))
+                                .widthIn(max=LocalConfiguration.current.screenWidthDp.dp - 30.dp)
+                                .heightIn(max=LocalConfiguration.current.screenHeightDp.dp - 30.dp)
+
+                        )
+                        Icon(imageVector = Icons.Filled.Delete, contentDescription = "",
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        file_name = uri.lastPathSegment ?: ""
+                                        delBtn=true
+                                        setContent() {
+                                            EditPixelTheme {
+                                                Surface(
+                                                    modifier = Modifier,
+                                                    color = Color.DarkGray
+                                                ) {
+                                                    Gallery(project_name)
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                            }
-                        ))
+                                )
+                                .align(Alignment.TopCenter))
+                        Icon(imageVector = Icons.Filled.Send, contentDescription = "",
+                            modifier = Modifier
+                                .clickable(
+                                    onClick = {
+                                        file_uri=uri
+                                        Log.d(TAG,"file uri is:"+file_uri)
+                                        ExportBtn=true
+                                    }
+                                )
+                                .align(Alignment.BottomCenter))
+                    }
                 }
-            }
 
+            }
+            Button(onClick = {ProjectPage()}, modifier = Modifier){
+                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="",
+                    modifier = Modifier.fillMaxWidth() )
+            }
         }
 
 
@@ -178,5 +305,6 @@ class ProjectGallery : AppCompatActivity() {
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
+
     }
 }

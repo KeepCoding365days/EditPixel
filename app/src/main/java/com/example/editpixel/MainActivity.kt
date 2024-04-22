@@ -51,14 +51,13 @@ import kotlinx.coroutines.withContext
 
 
 class MainActivity : ComponentActivity() {
-    private val imagePaths = mutableStateListOf<Uri>()
 
     companion object {
         const val MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        imagePaths.add(Uri.parse("https://imgur.com/CT26g5p"))
+
         super.onCreate(savedInstanceState)
         val helper=StorageHelper()
         val projects=helper.ProjectList(applicationContext)
@@ -68,89 +67,7 @@ class MainActivity : ComponentActivity() {
         }
         startActivity(i)
         finish()
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_MEDIA_IMAGES),
-                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE
-            )
-        } else {
-            setContent {
-
-                EditPixelTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        MainContent()
-                    }
-                }
-            }
-        }
-    }
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    setContent {
-                        EditPixelTheme {
-                            Surface(
-                                modifier = Modifier.fillMaxSize(),
-                                color = MaterialTheme.colorScheme.background
-                            ) {
-                                MainContent()
-                            }
-                            }
-                        }
-                    }
-                else {
-                    // Permission denied. Handle the functionality that depends on this permission.
-                }
-                return
-            }
-            else -> {
-                // Ignore all other requests.
-            }
-        }
-    }
-
-
-
-    @Composable
-    fun MainContent() {
-        val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-            imagePaths.clear()
-            imagePaths.addAll(uris)
-        }
-
-        Column {
-            Button(onClick = { launcher.launch(arrayOf("image/*")) }) {
-                Text("Select Images")
-            }
-            Button(onClick = {if(imagePaths.isNotEmpty())
-            {
-                val bitmap= ExtractBitmap(imagePaths[0])
-                val i= Intent(applicationContext,Editor::class.java)
-                //i.putExtra("bitmap",bitmap)
-                BitmapObject.bitmap=bitmap
-                startActivity(i)
-                finish()
-            }
-            }) {
-                Text("Start Editing")
-            }
 
     }
-}
-fun ExtractBitmap(uri: Uri):Bitmap{
-    val source= ImageDecoder.createSource(this.contentResolver,uri)
-    val bitmap= ImageDecoder.decodeBitmap(source)
-    return bitmap
-}
 
 }

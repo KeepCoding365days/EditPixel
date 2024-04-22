@@ -10,6 +10,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -28,16 +29,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +54,7 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 
 class ProjectList : AppCompatActivity() {
     private val helper=StorageHelper()
+    private val project_name=""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -66,6 +71,8 @@ class ProjectList : AppCompatActivity() {
         val bitmap= ImageDecoder.decodeBitmap(source)
         return bitmap
     }
+
+
 
     @Composable
     fun Projects(){
@@ -94,11 +101,49 @@ class ProjectList : AppCompatActivity() {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
     }
+
     @Composable
     fun ProjectCard(name:String){
         val uri=helper.getProjectImage(applicationContext,name)
         var bitmap=BitmapFactory.decodeResource(applicationContext.resources,R.drawable.logo)
+        var delBtn by remember {
+            mutableStateOf(false)
+        }
 
+        if (delBtn){
+            AlertDialog(onDismissRequest = { delBtn=false  },title={
+                Text("Are you sure to delete this Project")
+            },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if(helper.deleteProject(applicationContext,name)){
+                        Toast.makeText(applicationContext,"Project deleted",Toast.LENGTH_SHORT).show()
+                            setContent(){
+                                EditPixelTheme {
+                                    Surface (modifier = Modifier) {
+                                        Projects()
+                                    }
+                                }
+                            }
+                    }
+                    else{
+                        Toast.makeText(applicationContext,"Project can not be deleted",Toast.LENGTH_SHORT).show()
+                    }
+                        delBtn=false
+                    }
+
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {delBtn=false}
+                    ) {
+                        Text("Cancel")
+                    }
+                })
+
+        }
         if (uri!=null){
             bitmap=ExtractBitmap(uri)
         }
@@ -120,21 +165,13 @@ class ProjectList : AppCompatActivity() {
                         contentDescription = null,
                         Modifier
                             .size(size = 150.dp)
-                            .border(BorderStroke(4.dp, Color.White), CircleShape)
                             .padding(10.dp)
                             .clip(CircleShape)
                     )
                     Icon(imageVector = Icons.Filled.Delete, contentDescription = "", modifier =
                     Modifier.clickable (onClick = {
-                        val helper=StorageHelper()
-                        helper.deleteProject(applicationContext,name)
-                        setContent(){
-                            EditPixelTheme {
-                                Surface (modifier = Modifier) {
-                                    Projects()
-                                }
-                            }
-                        }
+                        delBtn=true
+
                     }))
                 }
 

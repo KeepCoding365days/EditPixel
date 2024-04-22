@@ -77,6 +77,17 @@ class LandingPage : AppCompatActivity() {
         }
 
     }
+    fun Projectlist(){
+        val helper=StorageHelper()
+
+        if (helper.ProjectList(applicationContext).isNotEmpty()){
+            val i= Intent(applicationContext,ProjectList::class.java)
+            startActivity(i)
+            finish()
+        }
+
+    }
+
 
     @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
     @Composable
@@ -128,6 +139,7 @@ class LandingPage : AppCompatActivity() {
             },
             dismissButton = {
                             Button(onClick = { onDismiss()
+                                Projectlist()
                                 //inputText.value=""
                             }) {
                                 Text("Cancel")

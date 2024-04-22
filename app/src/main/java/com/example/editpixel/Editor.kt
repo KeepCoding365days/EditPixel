@@ -23,12 +23,18 @@ import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
@@ -183,6 +189,36 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         finish()
     }
 
+    fun CallFilters(){
+        //update it
+        //val i = Intent(applicationContext, ProjectGallery::class.java)
+        //startActivity(i)
+        //finish()
+    }
+    fun CallBg(){
+        //update it
+        //val i = Intent(applicationContext, ProjectGallery::class.java)
+        //startActivity(i)
+        //finish()
+    }
+    fun CallFg(){
+        //update it
+        //val i = Intent(applicationContext, ProjectGallery::class.java)
+        //startActivity(i)
+        //finish()
+    }
+    fun CallCrop(){
+        //update it
+        //val i = Intent(applicationContext, ProjectGallery::class.java)
+        //startActivity(i)
+        //finish()
+    }
+    fun CallAdvance(){
+        //update it
+        //val i = Intent(applicationContext, ProjectGallery::class.java)
+        //startActivity(i)
+        //finish()
+    }
     @Composable
     fun EditorUI(bitmap:Bitmap) {
         var composer_bitmap by remember {
@@ -212,12 +248,20 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     }
                     )
                 )*/
-                Row() {
-                    TextButton(onClick = { cancelBtn=true}) {
-                        Text("Cancel")
+                Row(
+                    modifier = Modifier.padding(vertical = 5.dp)
+                ) {
+                    TextButton(onClick = {cancelBtn=true}, modifier = Modifier.weight(1f).
+                        background(color=Color.Gray).padding(2.dp)){
+                        Icon(imageVector = Icons.Filled.Delete, contentDescription ="",tint=Color.White
+                            )
                     }
-                    TextButton(onClick = { saveButton = true }) {
-                        Text("Save")
+
+                    TextButton(onClick = {saveButton=true}, modifier = Modifier.weight(1f).
+                        background(color=Color.Black).padding(2.dp)){
+                        Icon(imageVector = Icons.Filled.Done, contentDescription ="", tint = Color.White
+
+                             )
                     }
                 }
                 if(cancelBtn) {
@@ -254,8 +298,8 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                 horizontalAlignment=Alignment.CenterHorizontally
                             ) {
                                 Text(text="How would you like to save your image?",
-                                    modifier=Modifier.padding(6.dp), textAlign = TextAlign.Center)
-                                Row (horizontalArrangement = Arrangement.SpaceBetween) {
+                                    modifier=Modifier.padding(6.dp).weight(1f), textAlign = TextAlign.Center)
+                                Row (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
                                     Button(onClick = {
                                         val helper = StorageHelper()
                                         helper.SaveImage(
@@ -264,18 +308,22 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                             applicationContext,
                                             composer_bitmap
                                         )
-                                    }) {
+                                        BitmapObject.bitmap=composer_bitmap
+                                        ImgBitmap=BitmapObject.bitmap
+                                        saveButton=false
+                                    }, modifier = Modifier.weight(1f)) {
                                         Text("Save")
                                     }
                                     Button(onClick = {
                                         val helper = StorageHelper()
-                                        BitmapObject.file_name = helper.AddtoProject(
+                                        helper.AddtoProject(
                                             project_name,
                                             applicationContext,
                                             composer_bitmap
                                         )
-
-                                    }) {
+                                        composer_bitmap=ImgBitmap
+                                        saveButton=false
+                                    },modifier=Modifier.weight(1f)) {
                                         Text("Save a Copy")
                                     }
                                 }
@@ -299,7 +347,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 var hue by remember { mutableStateOf(0f) }
 
                 var brightness by remember { mutableStateOf(0f) }
-                var contrast by remember { mutableStateOf(0f) }
+                var contrast by remember { mutableStateOf(1f) }
 
 
                 var colorTemperature by remember { mutableStateOf(0f) }
@@ -329,7 +377,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     BarButton("Contrast", R.drawable.contrast, selectedButton == "contrast") {
                         selectedButton = "contrast"
                     }
-                    BarButton("Filter", R.drawable.filters, selectedButton == "Filters") {
+                    BarButton("Filter", R.drawable.filters, selectedButton == "Filter") {
                         selectedButton = "Filter"
                     }
                     BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
@@ -357,8 +405,22 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         selectedButton = "Advanced"
                     }
                 }
-
-                if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
+                if (selectedButton=="Background"){
+                    CallBg()
+                }
+                else if(selectedButton=="Foreground"){
+                    CallFg()
+                }
+                else if(selectedButton=="Filter"){
+                    CallFilters()
+                }
+                else if(selectedButton=="Crop"){
+                    CallCrop()
+                }
+                else if(selectedButton=="Advanced"){
+                    CallAdvance()
+                }
+                else if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(
                             value = colorTemperature,
@@ -398,7 +460,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
                             },
-                            valueRange = -1f..1f,modifier = Modifier)
+                            valueRange = -255f..255f,modifier = Modifier)
 
                         Text(text=String.format("%.2f",brightness),modifier=Modifier.height(30.dp))
                     }
@@ -409,7 +471,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustContrast (ImgBitmap,contrast)
                             },
-                            valueRange = -1f..1f, modifier = Modifier)
+                            valueRange = 0f..10f, modifier = Modifier)
 
                         Text(text=String.format("%.2f",contrast),modifier=Modifier.height(30.dp))
                     }
