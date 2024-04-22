@@ -23,6 +23,7 @@ import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -190,10 +191,19 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
 
     fun CallFilters(){
-        //update it
-        //val i = Intent(applicationContext, ProjectGallery::class.java)
-        //startActivity(i)
-        //finish()
+        //set filters flag to true to display filter module
+        BitmapObject.filters = true
+        Log.d("Decode","Filters launching")
+        recreate()
+        Log.d("Decode","Filters launched")
+    }
+
+    fun CloseFilters(){
+        //set filters flag to true to display filter module
+        BitmapObject.filters = false
+        Log.d("Decode","Filters launching")
+        recreate()
+        Log.d("Decode","Filters launched")
     }
     fun CallBg(){
         //update it
@@ -221,9 +231,23 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
     @Composable
     fun EditorUI(bitmap:Bitmap) {
+        Log.d("Decode","UI Launched")
+
+
         var composer_bitmap by remember {
             mutableStateOf(bitmap)
         }
+
+        // launch filters module if filters option selected
+        if(BitmapObject.filters){
+
+            Log.d("Decode","Filters True")
+            Filters(BitmapObject,::CloseFilters)
+        }
+        // else show the editor panel UI
+        else{
+
+            Log.d("Decode","Filters False")
         Surface(modifier = Modifier.fillMaxSize(),
             color = Color.DarkGray) {
 
@@ -377,9 +401,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     BarButton("Contrast", R.drawable.contrast, selectedButton == "contrast") {
                         selectedButton = "contrast"
                     }
-                    BarButton("Filter", R.drawable.filters, selectedButton == "Filter") {
-                        selectedButton = "Filter"
-                    }
+
+                    BarButton("Filter", R.drawable.filters, selectedButton == "Filter", {CallFilters()})
+
                     BarButton("Crop", R.drawable.crop, selectedButton == "Crop") {
                         selectedButton = "Crop"
                     }
@@ -477,6 +501,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     }
                 }
             }
+        }
         }
     }
 
