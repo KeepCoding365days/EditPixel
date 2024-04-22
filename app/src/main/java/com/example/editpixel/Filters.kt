@@ -55,7 +55,7 @@ fun Filters(bitmap: BitmapObject, callback: () -> Unit){
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = Color.hsv(213f, 0.66f, 0.78f))
             ) {
-                Text("Save")
+                Text("Apply")
             }
             Button(
                 shape = RoundedCornerShape(0),
@@ -73,7 +73,9 @@ fun Filters(bitmap: BitmapObject, callback: () -> Unit){
 
 @Composable
 fun FilterButtons(bg : ImageBitmap, update : (Int) -> (Unit)) {
+    val names = arrayOf("Original", "Auto", "GreyScale", "Paris", "Invert", "Egypt", "Vintage")
     val scrollState = rememberScrollState()
+
 
     Row(modifier = Modifier
         .horizontalScroll(scrollState)
@@ -82,13 +84,17 @@ fun FilterButtons(bg : ImageBitmap, update : (Int) -> (Unit)) {
     {
         repeat(7) { index ->
             val newbg = applyFilter(bg.asAndroidBitmap() , index)
-            FilterButton(text = "Button", bg = newbg, i = index , { num -> update(num) })
+            var name = names.getOrNull(index)
+            if (name == null){
+                name = "Undefined"
+            }
+            FilterButton(text = "Button", bg = newbg, i = index , { num -> update(num) },name = name)
         }
     }
 }
 
 @Composable
-fun FilterButton(text: String, bg: ImageBitmap, i : Int, update: (Int) -> Unit){
+fun FilterButton(text: String, bg: ImageBitmap, i : Int, update: (Int) -> Unit, name : String){
     Box(Modifier.fillMaxWidth().padding(start = 2.dp, end = 2.dp, top = 4.dp, bottom = 4.dp).clickable { update(i) }){
         Image(
             bitmap = bg,
@@ -96,7 +102,7 @@ fun FilterButton(text: String, bg: ImageBitmap, i : Int, update: (Int) -> Unit){
             modifier = Modifier.height(120.dp).width(120.dp).clip(RoundedCornerShape(5.dp))
         )
         Text(
-            text=text,
+            text=name,
             color=Color.White,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.Center))
