@@ -359,6 +359,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     BarButton("Saturation", R.drawable.hue, selectedButton == "Saturation") {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "Saturation"
                     }
                     BarButton(
@@ -366,15 +367,19 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         R.drawable.temp,
                         selectedButton == "Colors"
                     ) {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "Colors"
                     }
                     BarButton("Hue", R.drawable.hue, selectedButton == "Hue") {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "Hue"
                     }
                     BarButton("Brightness", R.drawable.brightness, selectedButton == "brightness") {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "brightness"
                     }
                     BarButton("Contrast", R.drawable.contrast, selectedButton == "contrast") {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "contrast"
                     }
                     BarButton("Filter", R.drawable.filters, selectedButton == "Filter") {
@@ -402,6 +407,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         R.drawable.advanced,
                         selectedButton == "Advanced"
                     ) {
+                        composer_bitmap=ImgBitmap
                         selectedButton = "Advanced"
                     }
                 }
@@ -421,6 +427,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     CallAdvance()
                 }
                 else if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
+                    //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(
                             value = colorTemperature,
@@ -437,6 +444,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 }
 
                 else if (selectedButton == "Saturation") {
+                    //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(value = saturation, onValueChange = { value ->
                             saturation = value
@@ -445,6 +453,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         Text(text=String.format("%.2f",saturation))
                     }
                 } else if (selectedButton == "Hue") {
+                    //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Slider(value = hue, onValueChange = { value -> hue = value },
                             onValueChangeFinished = {
@@ -455,6 +464,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     }
                 }
                 else if(selectedButton=="brightness"){
+                    //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally){
                         Slider(value = brightness, onValueChange = { value -> brightness = value },
                             onValueChangeFinished = {
@@ -466,6 +476,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                     }
                 }
                 else if(selectedButton=="contrast"){
+                    //composer_bitmap=ImgBitmap
                     Column (horizontalAlignment = Alignment.CenterHorizontally){
                         Slider(value = contrast, onValueChange = { value -> contrast = value },
                             onValueChangeFinished = {
