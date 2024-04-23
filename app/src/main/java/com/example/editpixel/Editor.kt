@@ -300,7 +300,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                 Text(text="How would you like to save your image?",
                                     modifier=Modifier.padding(6.dp).weight(1f), textAlign = TextAlign.Center)
                                 Row (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
-                                    Button(onClick = {
+                                    TextButton(onClick = {
                                         val helper = StorageHelper()
                                         helper.SaveImage(
                                             project_name = project_name,
@@ -314,7 +314,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                     }, modifier = Modifier.weight(1f)) {
                                         Text("Save")
                                     }
-                                    Button(onClick = {
+                                    TextButton(onClick = {
                                         val helper = StorageHelper()
                                         helper.AddtoProject(
                                             project_name,
@@ -472,7 +472,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             },
                             valueRange = -255f..255f,modifier = Modifier)
 
-                        Text(text=String.format("%.2f",brightness),modifier=Modifier.height(30.dp))
+                        Text(text=String.format("%.2f",brightness),modifier=Modifier)
                     }
                 }
                 else if(selectedButton=="contrast"){
@@ -484,7 +484,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             },
                             valueRange = 0f..10f, modifier = Modifier)
 
-                        Text(text=String.format("%.2f",contrast),modifier=Modifier.height(30.dp))
+                        Text(text=String.format("%.2f",contrast),modifier=Modifier)
                     }
                 }
             }
@@ -499,7 +499,8 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 onClick = onClick,
                 modifier = Modifier.padding(horizontal = 2.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isSelected) Color.Black else Color.Transparent
+                    containerColor = Color.Transparent,
+                    contentColor = if (isSelected) Color.Black else Color.White
                 )
             ) {
                 Column() {
