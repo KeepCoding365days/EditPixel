@@ -262,7 +262,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         }
 
         Surface(modifier = Modifier.fillMaxSize(),
-            color = Color.DarkGray) {
+            color = Color.Black) {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -476,7 +476,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             },
                             valueRange = -100f..100f // Adjust the range as needed for your temperature scale
                         )
-                        Text(text = String.format("%.2f", colorTemperature))
+                        Text(text = String.format("%.2f", colorTemperature),color=Color.LightGray)
                     }
                 }
 
@@ -487,7 +487,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             saturation = value
                         }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(ImgBitmap,saturation)
                                 }, valueRange = 0f..100f)
-                        Text(text=String.format("%.2f",saturation))
+                        Text(text=String.format("%.2f",saturation),color=Color.LightGray)
                     }
                 } else if (selectedButton == "Hue") {
                     //composer_bitmap=ImgBitmap
@@ -497,7 +497,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                 composer_bitmap=adjustHue(ImgBitmap,hue)
                             },
                             valueRange = 0f..360f, modifier = Modifier)
-                        Text(text=String.format("%.2f",hue))
+                        Text(text=String.format("%.2f",hue),color=Color.LightGray)
                     }
                 }
                 else if(selectedButton=="brightness"){
@@ -509,7 +509,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             },
                             valueRange = -255f..255f,modifier = Modifier)
 
-                        Text(text=String.format("%.2f",brightness),modifier=Modifier)
+                        Text(text=String.format("%.2f",brightness),modifier=Modifier,color=Color.LightGray)
                     }
                 }
                 else if(selectedButton=="contrast"){
@@ -521,7 +521,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             },
                             valueRange = 0f..10f, modifier = Modifier)
 
-                        Text(text=String.format("%.2f",contrast),modifier=Modifier)
+                        Text(text=String.format("%.2f",contrast),modifier=Modifier,color=Color.LightGray)
                     }
                 }
             }
@@ -537,7 +537,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 modifier = Modifier.padding(horizontal = 2.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = if (isSelected) Color.Black else Color.White
+                    contentColor = if (isSelected) Color.LightGray else Color.White
                 )
             ) {
                 Column() {
