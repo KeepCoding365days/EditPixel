@@ -77,7 +77,7 @@ class Advance : AppCompatActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black),
-                    color = MaterialTheme.colorScheme.background
+                    //color = MaterialTheme.colorScheme.background
                 ) {
                     UI()
                 }
@@ -271,7 +271,7 @@ class Advance : AppCompatActivity() {
 
 
 
-        Column {
+        Column (modifier=Modifier.background(color=Color.Black)){
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Image Editor Application",
