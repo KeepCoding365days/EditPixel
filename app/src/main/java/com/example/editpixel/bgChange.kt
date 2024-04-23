@@ -121,8 +121,7 @@ class bgChange : AppCompatActivity() {
                 Button(
                     onClick = {
                         backBtn=true
-                    },
-                    enabled = currentIndex > 0
+                    }
                 ) {
                     Text(text = "Back")
                 }
