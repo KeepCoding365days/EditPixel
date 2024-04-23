@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 
 import androidx.compose.material.icons.filled.Refresh
@@ -92,7 +95,6 @@ class Advance : AppCompatActivity() {
 
 
 
-
 sealed class EditAction {
     data class AddLine(val line: Line) : EditAction()
     data class RemoveLine(val line: Line) : EditAction()
@@ -131,7 +133,6 @@ fun SimpleColorPicker(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -377,6 +378,34 @@ fun UI() {
                     modifier = Modifier.size(32.dp)
                 )
             }
+                Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
+                IconButton(
+                    onClick = {
+                        //onBack()
+                    },
+                    modifier = Modifier.border(1.dp, Color.White)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Save Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
+            IconButton(
+                onClick = {
+                    //onBack()
+                },
+                modifier = Modifier.border(1.dp, Color.White)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Clear,
+                    contentDescription = "Save Icon",
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
             IconButton(
                 onClick = {
@@ -439,6 +468,26 @@ fun EraserIcon() {
     Icon(
         imageVector = Icons.Default.Create,
         contentDescription = "Eraser Icon",
+        tint = Color.White,
+        modifier = Modifier.size(32.dp)
+    )
+}
+
+@Composable
+fun SaveIcon() {
+    Icon(
+        imageVector = Icons.Default.Check,
+        contentDescription = "Save Icon",
+        tint = Color.White,
+        modifier = Modifier.size(32.dp)
+    )
+}
+
+@Composable
+fun BackIcon() {
+    Icon(
+        imageVector = Icons.Default.Close,
+        contentDescription = "Save Icon",
         tint = Color.White,
         modifier = Modifier.size(32.dp)
     )
