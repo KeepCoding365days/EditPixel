@@ -38,6 +38,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class Editor : AppCompatActivity() {
@@ -219,11 +222,37 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         //startActivity(i)
         //finish()
     }
+    suspend fun saveToProject(composer_bitmap:Bitmap){
+        val helper=StorageHelper()
+        helper.AddtoProject(
+            project_name,
+            applicationContext,
+            composer_bitmap
+        )
+    }
+    suspend fun saveImage(composer_bitmap: Bitmap){
+        val helper=StorageHelper()
+        helper.SaveImage(
+            project_name = project_name,
+            file_name,
+            applicationContext,
+            composer_bitmap
+        )
+    }
+
     @Composable
     fun EditorUI(bitmap:Bitmap) {
         var composer_bitmap by remember {
             mutableStateOf(bitmap)
         }
+        var selectedButton by remember { mutableStateOf("") }
+        var saveButton by remember {
+            mutableStateOf(false)
+        }
+        var cancelBtn by remember {
+            mutableStateOf(false)
+        }
+
         Surface(modifier = Modifier.fillMaxSize(),
             color = Color.DarkGray) {
 
@@ -234,13 +263,6 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
             ) {
 
                 /* top icons row */
-                var selectedButton by remember { mutableStateOf("") }
-                var saveButton by remember {
-                    mutableStateOf(false)
-                }
-                var cancelBtn by remember {
-                    mutableStateOf(false)
-                }
 
                 /*Icon(imageVector = Icons.Filled.Done,contentDescription= "",tint=Color.Green,
                     modifier = Modifier.clickable (onClick={
@@ -253,7 +275,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 ) {
                     TextButton(onClick = {cancelBtn=true}, modifier = Modifier.weight(1f).
                         background(color=Color.Gray).padding(2.dp)){
-                        Icon(imageVector = Icons.Filled.Delete, contentDescription ="",tint=Color.White
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="",tint=Color.White
                             )
                     }
 
@@ -301,28 +323,23 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                     modifier=Modifier.padding(6.dp).weight(1f), textAlign = TextAlign.Center)
                                 Row (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
                                     TextButton(onClick = {
-                                        val helper = StorageHelper()
-                                        helper.SaveImage(
-                                            project_name = project_name,
-                                            file_name,
-                                            applicationContext,
-                                            composer_bitmap
-                                        )
                                         BitmapObject.bitmap=composer_bitmap
                                         ImgBitmap=BitmapObject.bitmap
                                         saveButton=false
+                                        val helper = StorageHelper()
+                                        CoroutineScope(Dispatchers.Main).launch{
+                                            saveImage(composer_bitmap)
+                                        }
                                     }, modifier = Modifier.weight(1f)) {
                                         Text("Save")
                                     }
                                     TextButton(onClick = {
-                                        val helper = StorageHelper()
-                                        helper.AddtoProject(
-                                            project_name,
-                                            applicationContext,
-                                            composer_bitmap
-                                        )
                                         composer_bitmap=ImgBitmap
                                         saveButton=false
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            saveToProject(composer_bitmap)
+                                        }
+
                                     },modifier=Modifier.weight(1f)) {
                                         Text("Save a Copy")
                                     }
@@ -351,6 +368,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
 
 
                 var colorTemperature by remember { mutableStateOf(0f) }
+                fun reset_values(){
+                    saturation=0f
+                    hue=0f
+                    brightness=0f
+                    contrast=1f
+                    colorTemperature=0f
+                }
 
                 Row(
                     //horizontalArrangement = Arrangement.SpaceEvenly,
@@ -359,6 +383,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         .horizontalScroll(rememberScrollState())
                 ) {
                     BarButton("Saturation", R.drawable.hue, selectedButton == "Saturation") {
+                        reset_values()
                         composer_bitmap=ImgBitmap
                         selectedButton = "Saturation"
                     }
@@ -367,18 +392,22 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         R.drawable.temp,
                         selectedButton == "Colors"
                     ) {
+                        reset_values()
                         composer_bitmap=ImgBitmap
                         selectedButton = "Colors"
                     }
                     BarButton("Hue", R.drawable.hue, selectedButton == "Hue") {
+                        reset_values()
                         composer_bitmap=ImgBitmap
                         selectedButton = "Hue"
                     }
                     BarButton("Brightness", R.drawable.brightness, selectedButton == "brightness") {
+                        reset_values()
                         composer_bitmap=ImgBitmap
                         selectedButton = "brightness"
                     }
                     BarButton("Contrast", R.drawable.contrast, selectedButton == "contrast") {
+                        reset_values()
                         composer_bitmap=ImgBitmap
                         selectedButton = "contrast"
                     }
