@@ -51,10 +51,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.example.editpixel.BitmapObject
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 import java.util.Queue
-import com.example.myapplication.R
 
 class PolygonCropActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.P)
@@ -62,7 +62,7 @@ class PolygonCropActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.test1)
+            val bitmap = BitmapObject.bitmap
             val imageBitmap = bitmap.asImageBitmap()
 
             //Polygon Crop

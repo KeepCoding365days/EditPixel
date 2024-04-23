@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.editpixel
 
 import android.content.ContentValues
 import android.content.Context
@@ -60,6 +60,7 @@ import com.canhub.cropper.CropImage.CancelledResult.uriContent
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
+import com.example.myapplication.PolygonCropActivity
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.File
@@ -69,13 +70,14 @@ import java.util.Queue
 import kotlinx.coroutines.*
 
 
+
 @Composable
 fun HomeScreen() {
     val context = LocalContext.current
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-
-    val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) {result ->
+    bitmap=BitmapObject.bitmap
+    /*val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) {result ->
         if (result.isSuccessful) {
             imageUri = result.uriContent
         }
@@ -100,7 +102,7 @@ fun HomeScreen() {
             val source = ImageDecoder.createSource(context.contentResolver, imageUri!!)
             bitmap = ImageDecoder.decodeBitmap(source)
         }
-    }
+    }*/
 
     Column(
         modifier = Modifier
@@ -156,7 +158,7 @@ fun HomeScreen() {
         ) {
             Button(onClick = {
                 val cropOption = CropImageContractOptions(uriContent, CropImageOptions())
-                imageCropLauncher.launch(cropOption)
+                //imageCropLauncher.launch(cropOption)
             }) {
                 Text("Select Image and Crop")
             }

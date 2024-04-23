@@ -1,19 +1,22 @@
-package com.example.myapplication
+package com.example.editpixel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import com.example.editpixel.ui.theme.EditPixelTheme
 
-class `crop.kt` : ComponentActivity() {
+class crop :AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyApplicationTheme {
+            EditPixelTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -23,6 +26,12 @@ class `crop.kt` : ComponentActivity() {
                 }
             }
         }
+    }
+    fun BacktoEditor(){
+        //BitmapObject.bitmap=ur bitmap
+        val i= Intent(applicationContext,Editor::class.java)
+        startActivity(i)
+        finish()
     }
 }
 

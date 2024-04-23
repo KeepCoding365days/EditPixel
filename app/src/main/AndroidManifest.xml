@@ -25,6 +25,8 @@
         <activity
             android:name=".ProjectGallery"
             android:exported="false" />
+        <activity android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
         <activity
             android:name=".LandingPage"
             android:exported="false" >

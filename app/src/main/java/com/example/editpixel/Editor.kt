@@ -209,9 +209,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
     fun CallCrop(){
         //update it
-        //val i = Intent(applicationContext, ProjectGallery::class.java)
-        //startActivity(i)
-        //finish()
+        val i = Intent(applicationContext, crop::class.java)
+        startActivity(i)
+        finish()
     }
     fun CallAdvance(){
         //update it
