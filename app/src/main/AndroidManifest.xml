@@ -18,8 +18,12 @@
         <activity
             android:name=".filter"
             android:exported="false" />
+
         <activity
             android:name=".Editor"
+            android:exported="false" />
+        <activity
+            android:name=".bgChange"
             android:exported="false" />
         <activity
             android:name=".ProjectList"
