@@ -67,11 +67,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 
 class ProjectGallery : AppCompatActivity() {
-    private val imagePaths = mutableStateListOf<Uri>()
     private var project_name:String=""
     private var file_name=""
     private var file_uri:Uri= Uri.EMPTY
@@ -117,7 +119,7 @@ class ProjectGallery : AppCompatActivity() {
         val bitmap= ImageDecoder.decodeBitmap(source)
         return bitmap
     }
-    fun savetoApp(list:List<Uri>){
+    suspend fun savetoApp(list:List<Uri>){
         Log.d(TAG,"save function called")
         for( path in  list){
             Log.d(TAG,"Inside loop")
@@ -140,7 +142,7 @@ class ProjectGallery : AppCompatActivity() {
         )
     }
 
-    fun ExportFile(uri:Uri){
+    suspend fun ExportFile(uri:Uri){
         val helper = StorageHelper()
         Log.d(TAG,"helper called. with uri: "+uri.toString())
         helper.exportFileToGallery(applicationContext, uri)
@@ -151,10 +153,15 @@ class ProjectGallery : AppCompatActivity() {
 
     @Composable
     fun Gallery(name: String?){
+        val imagePaths = remember {
+            mutableStateListOf<Uri>()
+        }
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
             imagePaths.clear()
             imagePaths.addAll(uris)
-            savetoApp(uris)
+            CoroutineScope(Dispatchers.Main).launch {
+                savetoApp(uris)
+            }
             setContent(){
                 EditPixelTheme {
                     Surface(
@@ -203,7 +210,10 @@ class ProjectGallery : AppCompatActivity() {
                     Text("Are you sure to Export this file to Gallery?")
                 },
                 confirmButton = {
-                    TextButton(onClick = {ExportFile(file_uri)
+                    TextButton(onClick = {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            ExportFile(file_uri)
+                        }
                         ExportBtn=false
                     }
 
@@ -238,9 +248,12 @@ class ProjectGallery : AppCompatActivity() {
                     val obj = StorageHelper()
                     val uris = obj.ExtractProjectUri(temp, applicationContext)
                     items(uris) { uri ->
+                        //CoroutineScope(Dispatchers.Main).launch {
                         val bitmap = ExtractBitmap(uri)
                     OutlinedCard(modifier = Modifier.padding(5.dp)) {
-                        Column(modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                        Column(modifier = Modifier
+                            .padding(10.dp)
+                            .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally ) {
                             Image(
                                 painter = BitmapPainter(bitmap.asImageBitmap()),
@@ -323,8 +336,10 @@ class ProjectGallery : AppCompatActivity() {
                       },
             modifier = Modifier
                 .padding(16.dp)
-                .offset(LocalConfiguration.current.screenWidthDp.dp-70.dp,
-                    LocalConfiguration.current.screenHeightDp.dp-100.dp)
+                .offset(
+                    LocalConfiguration.current.screenWidthDp.dp - 70.dp,
+                    LocalConfiguration.current.screenHeightDp.dp - 100.dp
+                )
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }

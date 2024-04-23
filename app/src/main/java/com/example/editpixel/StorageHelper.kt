@@ -40,6 +40,7 @@ class StorageHelper {
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                 }
                 Log.d("IMAGE_SAVE", "Image saved to ${imageFile.absolutePath}")
+                Toast.makeText(context, "Image copy saved", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.d(ContentValues.TAG,"can't save file")
                 e.printStackTrace()
@@ -97,6 +98,7 @@ class StorageHelper {
                 FileOutputStream(imageFile).use { fos ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                 }
+                Toast.makeText(context, "Image saved", Toast.LENGTH_SHORT).show()
                 Log.d("IMAGE_SAVE", "Image saved to ${imageFile.absolutePath}")
             } catch (e: Exception) {
                 Log.d(ContentValues.TAG,"can't save file")
