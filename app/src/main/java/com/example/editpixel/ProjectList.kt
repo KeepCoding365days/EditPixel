@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -61,7 +62,9 @@ class ProjectList : AppCompatActivity() {
         supportActionBar?.hide()
         setContent {
             EditPixelTheme {
-                Surface (modifier = Modifier) {
+                Surface (modifier = Modifier,
+                    color = Color.Black
+                ) {
                     Projects()
                 }
             }
@@ -150,7 +153,7 @@ class ProjectList : AppCompatActivity() {
             bitmap=ExtractBitmap(uri)
         }
         OutlinedCard (modifier = Modifier
-            .padding(10.dp)
+            .padding(10.dp).background(color = Color.Black)
             .clickable(onClick = {
                 val i = Intent(applicationContext, ProjectGallery::class.java)
                 i.putExtra("project_name", name)
@@ -159,7 +162,7 @@ class ProjectList : AppCompatActivity() {
             })) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.background(color = Color.Black)
             ) {
                 Box {
                     Image(
@@ -170,7 +173,7 @@ class ProjectList : AppCompatActivity() {
                             .padding(10.dp)
                             .clip(CircleShape)
                     )
-                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "", modifier =
+                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "",tint=Color.White, modifier =
                     Modifier.clickable (onClick = {
                         delBtn=true
 
@@ -178,7 +181,7 @@ class ProjectList : AppCompatActivity() {
                 }
 
                 Text(
-                    text = name, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Center,
+                    text = name, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Center,color= Color.White,
                     style = MaterialTheme.typography.displayMedium
                 )
             }

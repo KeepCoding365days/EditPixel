@@ -236,8 +236,9 @@ class ProjectGallery : AppCompatActivity() {
             temp=name
         }
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().background(color = Color.Black),
                 horizontalAlignment = Alignment.CenterHorizontally
+
             ) {
                 Text(
                     temp, modifier = Modifier.padding(5.dp), color = Color.White,
@@ -250,10 +251,9 @@ class ProjectGallery : AppCompatActivity() {
                     items(uris) { uri ->
                         //CoroutineScope(Dispatchers.Main).launch {
                         val bitmap = ExtractBitmap(uri)
-                    OutlinedCard(modifier = Modifier.padding(5.dp)) {
+                    OutlinedCard(modifier = Modifier.padding(5.dp).background(color = Color.Black)) {
                         Column(modifier = Modifier
-                            .padding(10.dp)
-                            .fillMaxWidth(),
+                            .fillMaxWidth().background(color = Color.Black),
                             horizontalAlignment = Alignment.CenterHorizontally ) {
                             Image(
                                 painter = BitmapPainter(bitmap.asImageBitmap()),
