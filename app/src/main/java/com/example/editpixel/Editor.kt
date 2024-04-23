@@ -197,12 +197,8 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
     fun CallBg(){
         //update it
-        //val i = Intent(applicationContext, ProjectGallery::class.java)
-        //startActivity(i)
-        //finish()
-        //add this line before calling editor.kt in ur activity
-        //BitmapObject.bitmap=urbitmap
-        val i = Intent(applicationContext, BgChanger::class.java)
+
+        val i = Intent(applicationContext, bgChange::class.java)
         startActivity(i)
         finish()
     }

@@ -15,11 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light"
         tools:targetApi="31">
-        <activity
-            android:name=".BgChanger"
-            android:exported="false" />
+
         <activity
             android:name=".Editor"
+            android:exported="false" />
+        <activity
+            android:name=".bgChange"
             android:exported="false" />
         <activity
             android:name=".ProjectList"
