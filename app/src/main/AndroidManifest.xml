@@ -30,6 +30,7 @@
             android:exported="false" />
         <activity
             android:name=".PolygonCropActivity"
+            android:name=".Advance"
             android:exported="false" />
         <activity
             android:name=".ProjectGallery"
