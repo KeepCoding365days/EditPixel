@@ -1,8 +1,10 @@
-package com.example.imageedit
+package com.example.editpixel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,9 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Redo
-import androidx.compose.material.icons.filled.Undo
+
+import androidx.compose.material.icons.filled.Refresh
+
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
@@ -54,15 +59,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.imageedit.ui.theme.ImageEditTheme
+import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlin.math.sqrt
 
 
-class MainActivity : ComponentActivity() {
+class Advance : AppCompatActivity() {
+    private val ImgBitmap=BitmapObject.bitmap
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ImageEditTheme {
+            EditPixelTheme {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -74,7 +80,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    fun onBack(){
+        //if u wanna save
+        BitmapObject.bitmap=ImgBitmap
+        val i = Intent(applicationContext,Editor::class.java)
+        startActivity(i)
+        finish()
+
+    }
 }
+
 
 
 
@@ -134,7 +149,8 @@ fun BrushSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        content = {
+
+        {
             Column(modifier = Modifier.padding(16.dp)) {
                 // Title
                 Text("Brush Settings")
@@ -181,6 +197,7 @@ fun BrushSettingsDialog(
                 }
             }
         }
+
     )
 }
 
@@ -207,7 +224,7 @@ fun UI() {
     val lines = remember {
         mutableStateListOf<Line>()
     }
-    val imageBitmap = ImageBitmap.imageResource(R.drawable.image)
+    val imageBitmap = BitmapObject.bitmap
     val undoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
     val redoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
     val undo = {
@@ -278,8 +295,17 @@ fun UI() {
                                 strokeWidth = ColorWidth.value.dp
                             )
                             if (isBrushActive) {
-                                if (isInsideCanvas(line.start, size.width.toInt(), size.height.toInt()) &&
-                                    isInsideCanvas(line.end, size.width.toInt(), size.height.toInt())) {
+                                if (isInsideCanvas(
+                                        line.start,
+                                        size.width.toInt(),
+                                        size.height.toInt()
+                                    ) &&
+                                    isInsideCanvas(
+                                        line.end,
+                                        size.width.toInt(),
+                                        size.height.toInt()
+                                    )
+                                ) {
                                     // Store the complete line as a single action
                                     undoHistory.add(EditAction.AddLine(line))
                                     lines.add(line)
@@ -287,7 +313,11 @@ fun UI() {
                             } else if (isEraserActive) {
                                 // If the eraser is active, check if any existing lines are within the eraser touch area and remove them
                                 val touchPosition = change.position
-                                lines.removeAll { it.start.distanceTo(touchPosition) < 20 || it.end.distanceTo(touchPosition) < 20 }
+                                lines.removeAll {
+                                    it.start.distanceTo(touchPosition) < 20 || it.end.distanceTo(
+                                        touchPosition
+                                    ) < 20
+                                }
                                 undoHistory.add(EditAction.RemoveLine(line))
                             }
                         }
@@ -296,7 +326,7 @@ fun UI() {
                 val canvasWidth = size.width.toInt()
                 val canvasHeight = size.height.toInt()
                 drawImage(
-                    image = imageBitmap,
+                    image = imageBitmap.asImageBitmap(),
                     dstSize = IntSize(canvasWidth, canvasHeight)
                 )
                 lines.forEach { line ->
@@ -341,7 +371,7 @@ fun UI() {
                 modifier = Modifier.border(1.dp, Color.White)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Undo,
+                    imageVector = Icons.Filled.ArrowBack,
                     contentDescription = "Undo Icon",
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
@@ -355,7 +385,7 @@ fun UI() {
                 modifier = Modifier.border(1.dp, Color.White)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Redo,
+                    imageVector = Icons.Filled.Refresh,
                     contentDescription = "Undo Icon",
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)

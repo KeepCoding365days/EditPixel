@@ -23,6 +23,9 @@
             android:name=".ProjectList"
             android:exported="false" />
         <activity
+            android:name=".Advance"
+            android:exported="false" />
+        <activity
             android:name=".ProjectGallery"
             android:exported="false" />
         <activity

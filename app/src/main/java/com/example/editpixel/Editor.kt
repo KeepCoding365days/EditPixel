@@ -215,9 +215,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
     }
     fun CallAdvance(){
         //update it
-        //val i = Intent(applicationContext, ProjectGallery::class.java)
-        //startActivity(i)
-        //finish()
+        val i = Intent(applicationContext, Advance::class.java)
+        startActivity(i)
+        finish()
     }
     @Composable
     fun EditorUI(bitmap:Bitmap) {
