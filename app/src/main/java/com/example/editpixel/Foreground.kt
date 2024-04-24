@@ -50,20 +50,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.ui.res.painterResource
 import com.example.editpixel.Editor
 import com.example.editpixel.ui.theme.EditPixelTheme
 
 
 var selectedColorIndex by mutableStateOf(0)
-class Foreground : AppCompatActivity() {
+class Foreground : AppCompatActivity() {//component activity to Appcompat activity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EditPixelTheme {
+            EditPixelTheme {//theme changed
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     MyAppContent(context = this)
                 }
@@ -82,7 +84,7 @@ class Foreground : AppCompatActivity() {
 
 @Composable
 fun MyAppContent(context: Context) {
-    var selectedDrawable by remember { mutableStateOf(R.drawable.images) }
+    var selectedDrawable by remember { mutableStateOf(R.drawable.bg) }//I changed it to to this image just to check if activity is opening
     var selectedColorIndex by remember { mutableStateOf(0) }
     var currentBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var undoStack = remember { mutableListOf<Bitmap?>() }
