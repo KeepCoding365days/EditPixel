@@ -1,29 +1,19 @@
 package com.example.editpixel
 
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,15 +33,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.example.editpixel.BitmapObject
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 import java.util.Queue
@@ -82,7 +71,6 @@ class PolygonCropActivity : ComponentActivity() {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
         val points = remember { mutableStateListOf<Offset>() }
-
         val bitmapPoints = remember { mutableStateListOf<Offset>() }
 
         var croppedImageBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
@@ -134,16 +122,17 @@ class PolygonCropActivity : ComponentActivity() {
                 if (croppedImageBitmap.value != null) {
                     BitmapObject.bitmap =
                         croppedImageBitmap.value?.asAndroidBitmap() ?: BitmapObject.bitmap
-                    Image(
+                    /*Image(
                         bitmap = croppedImageBitmap.value!!,
                         contentDescription = "Cropped Image",
                         contentScale = ContentScale.Fit
-                    )
+                    )*/
+
+                    goToCrop()
                 } else {
                     Canvas(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(4 / 3f)
+                            .fillMaxSize()
                             .clipToBounds()
                             .pointerInput(Unit) {
                                 detectTapGestures { offset ->
@@ -168,6 +157,20 @@ class PolygonCropActivity : ComponentActivity() {
                             dstSize = IntSize(canvasWidth, canvasHeight)
                         )
 
+                        for (point in points) {
+                            drawCircle(
+                                color = Color.Black,
+                                radius = 20f,
+                                center = point
+                            )
+                            drawCircle(
+                                color = Color.White,
+                                radius = 20f,
+                                center = point,
+                                style = Stroke(width = 5f)
+                            )
+                        }
+
                         if (points.size > 1) {
                             drawPath(
                                 path = Path().apply {
@@ -178,13 +181,20 @@ class PolygonCropActivity : ComponentActivity() {
                                         ) else lineTo(point.x, point.y)
                                     }
                                 },
-                                color = Color.Red,
-                                style = Stroke(width = 5f)
+                                color = Color.White,
+                                style = Stroke(
+                                    width = 5f,
+                                    pathEffect = PathEffect.dashPathEffect(
+                                        floatArrayOf(10f, 10f),
+                                        0f
+                                    )
+                                )
                             )
                         }
                     }
                 }
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxHeight(0.1f)
@@ -193,15 +203,7 @@ class PolygonCropActivity : ComponentActivity() {
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            )
-            {
-                Button(onClick = {
-                    saveBitmapToFilepolygon(context, croppedImageBitmap.value)
-
-                }) {
-                    Text("Save")
-                }
-            }
+            ) {}
         }
     }
 
@@ -283,8 +285,7 @@ class PolygonCropActivity : ComponentActivity() {
         croppedBitmap = addBorder(croppedBitmap, 1)
         val newImageBitmap: Bitmap = floodFill(croppedBitmap, 0, 0)
 
-        val composeBitmap: ImageBitmap = newImageBitmap.asImageBitmap()
-        return composeBitmap
+        return newImageBitmap.asImageBitmap()
     }
 
     fun bresenhamLine(x0: Int, y0: Int, x1: Int, y1: Int): List<Pair<Int, Int>> {
@@ -354,66 +355,19 @@ class PolygonCropActivity : ComponentActivity() {
     }
 
     private fun addBorder(bmp: Bitmap, borderSize: Int): Bitmap {
-        val bmpWithBorder = Bitmap.createBitmap(
-            bmp.getWidth() + borderSize * 2,
-            bmp.getHeight() + borderSize * 2,
-            bmp.getConfig()
-        )
+        val paint = android.graphics.Paint()
+        paint.color = android.graphics.Color.YELLOW
+        paint.style = android.graphics.Paint.Style.STROKE
+        paint.strokeWidth = borderSize.toFloat()
+
+        val bmpWithBorder = Bitmap.createBitmap(bmp.width + 2*borderSize, bmp.height + 2*borderSize, bmp.config)
         val canvas = android.graphics.Canvas(bmpWithBorder)
-        canvas.drawColor(android.graphics.Color.YELLOW)
         canvas.drawBitmap(bmp, borderSize.toFloat(), borderSize.toFloat(), null)
+        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat()-1, bmpWithBorder.height.toFloat()-1, paint)
+
         return bmpWithBorder
     }
 
-    private fun saveBitmapToFilepolygon(context: Context, imageBitmap: ImageBitmap?) {
-        imageBitmap?.let { imageBmp ->
-            val bmp = imageBmp.asAndroidBitmap() // Convert ImageBitmap to Bitmap
-            val values = ContentValues().apply {
-                put(
-                    MediaStore.Images.Media.DISPLAY_NAME,
-                    "cropped_image_${System.currentTimeMillis()}.webp"
-                )
-                put(MediaStore.Images.Media.MIME_TYPE, "image/webp")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    put(
-                        MediaStore.Images.Media.RELATIVE_PATH,
-                        "${Environment.DIRECTORY_PICTURES}/Stickers"
-                    )
-                }
-            }
-
-            val uri =
-                context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            if (uri == null) {
-                Log.e("SaveImage", "Failed to create new MediaStore record.")
-                return
-            }
-
-            try {
-                context.contentResolver.openOutputStream(uri).use { outputStream ->
-                    if (outputStream == null) {
-                        Log.e("SaveImage", "Failed to get output stream.")
-                        return
-                    }
-                    if (!bmp.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)) {
-                        Log.e("SaveImage", "Failed to save bitmap.")
-                        return
-                    }
-                    outputStream?.flush()
-                    outputStream?.close()
-                }
-                Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
-
-                // Broadcasting to make the image available in the gallery immediately
-                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                mediaScanIntent.data = uri
-                context.sendBroadcast(mediaScanIntent)
-            } catch (e: Exception) {
-                Log.e("SaveImage", "Exception in saving image", e)
-                Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
-            }
-        } ?: run {
-            Toast.makeText(context, "ImageBitmap is null", Toast.LENGTH_SHORT).show()
-        }
-    }
 }
+
+
