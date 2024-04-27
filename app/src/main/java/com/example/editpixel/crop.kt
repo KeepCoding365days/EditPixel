@@ -49,6 +49,9 @@ import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageOptions
 import com.example.editpixel.ui.theme.EditPixelTheme
 import com.example.editpixel.PolygonCropActivity
+import okio.IOException
+import java.io.File
+import java.io.FileOutputStream
 
 class crop :AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -130,7 +133,7 @@ class crop :AppCompatActivity() {
                     BitmapObject.bitmap= bitmap
                     saveBitmapToFile(context, bitmap)
                 }) {
-                    Text("Save")
+                    Text("Save as sticker")
                 }
             }
 
@@ -160,7 +163,8 @@ class crop :AppCompatActivity() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = {
-                    val cropOption = CropImageContractOptions(CropImage.CancelledResult.uriContent, CropImageOptions())
+                    val uri = bitmapToUri(context, bitmap)
+                    val cropOption = CropImageContractOptions(uri, CropImageOptions())
                     imageCropLauncher.launch(cropOption)
                 }) {
                     Text("Select Image and Crop")
@@ -175,7 +179,6 @@ class crop :AppCompatActivity() {
             }
         }
     }
-
 
     private fun saveBitmapToFile(context: Context, bitmap: Bitmap?) {
         bitmap?.let { bmp ->
@@ -223,3 +226,24 @@ class crop :AppCompatActivity() {
 
 }
 
+fun bitmapToUri(context: Context, bitmap: Bitmap): Uri? {
+    var uri: Uri? = null
+    try {
+        // Create a file in the cache directory
+        val file = File(context.cacheDir, "tempFile.png")
+        val outStream = FileOutputStream(file)
+
+        // Compress and write the bitmap to the file
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream)
+
+        // Flush and close the output stream
+        outStream.flush()
+        outStream.close()
+
+        // Get the Uri from the file
+        uri = Uri.fromFile(file)
+    } catch (e: IOException) {
+        e.printStackTrace()
+    }
+    return uri
+}
