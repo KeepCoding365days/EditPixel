@@ -141,14 +141,14 @@ class crop :AppCompatActivity() {
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(Color.DarkGray),
             ) {
                 if (bitmap != null) {
                     Image(
                         bitmap = bitmap?.asImageBitmap()!!,
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.Fit,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -168,7 +168,7 @@ class crop :AppCompatActivity() {
                     val cropOption = CropImageContractOptions(uri, CropImageOptions())
                     imageCropLauncher.launch(cropOption)
                 }) {
-                    Text("Select Image and Crop")
+                    Text("Simple Crop")
                 }
 
                 Button(onClick = {

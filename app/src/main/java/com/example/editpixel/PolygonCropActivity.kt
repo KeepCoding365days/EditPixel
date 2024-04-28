@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,8 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -75,9 +78,6 @@ class PolygonCropActivity : ComponentActivity() {
 
         var croppedImageBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
         var flag = true
-
-        val bitmapHeight = imageBitmap.height
-        val bitmapWidth = imageBitmap.width
 
         Column(
             modifier = Modifier
@@ -130,68 +130,88 @@ class PolygonCropActivity : ComponentActivity() {
 
                     goToCrop()
                 } else {
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clipToBounds()
-                            .pointerInput(Unit) {
-                                detectTapGestures { offset ->
-                                    val adjustedOffset = Offset(
-                                        offset.x * bitmapWidth / size.width,
-                                        offset.y * bitmapHeight / size.height
+
+                    val bitmapHeight = imageBitmap.height
+                    val bitmapWidth = imageBitmap.width
+
+                    Layout(
+                        modifier = Modifier.align(Alignment.Center),
+                        content = {
+                            Image(
+                                bitmap = imageBitmap,
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit
+                            )
+
+                            Canvas(modifier = Modifier
+                                .fillMaxSize()
+                                .clipToBounds()
+                                .pointerInput(Unit) {
+                                    detectTapGestures { offset ->
+                                        val adjustedOffset = Offset(
+                                            offset.x * bitmapWidth / size.width,
+                                            offset.y * bitmapHeight / size.height
+                                        )
+                                        points.add(offset)
+
+                                        if (flag == true)
+                                            bitmapPoints.add(adjustedOffset)
+
+                                        //println(points.toList())
+                                        //println(bitmapPoints.toList())
+                                    }
+                                }
+                            ) {
+                                for (point in points) {
+                                    drawCircle(
+                                        color = Color.Black,
+                                        radius = 20f,
+                                        center = point
                                     )
-                                    points.add(offset)
+                                    drawCircle(
+                                        color = Color.White,
+                                        radius = 20f,
+                                        center = point,
+                                        style = Stroke(width = 5f)
+                                    )
+                                }
 
-                                    if (flag == true)
-                                        bitmapPoints.add(adjustedOffset)
-
-                                    //println(points.toList())
-                                    //println(bitmapPoints.toList())
+                                if (points.size > 1) {
+                                    drawPath(
+                                        path = Path().apply {
+                                            points.forEachIndexed { index, point ->
+                                                if (index == 0) moveTo(
+                                                    point.x,
+                                                    point.y
+                                                ) else lineTo(point.x, point.y)
+                                            }
+                                        },
+                                        color = Color.White,
+                                        style = Stroke(
+                                            width = 5f,
+                                            pathEffect = PathEffect.dashPathEffect(
+                                                floatArrayOf(10f, 10f),
+                                                0f
+                                            )
+                                        )
+                                    )
                                 }
                             }
-                    ) {
-                        val canvasWidth = size.width.toInt()
-                        val canvasHeight = size.height.toInt()
-                        drawImage(
-                            image = imageBitmap,
-                            dstSize = IntSize(canvasWidth, canvasHeight)
-                        )
-
-                        for (point in points) {
-                            drawCircle(
-                                color = Color.Black,
-                                radius = 20f,
-                                center = point
-                            )
-                            drawCircle(
-                                color = Color.White,
-                                radius = 20f,
-                                center = point,
-                                style = Stroke(width = 5f)
-                            )
-                        }
-
-                        if (points.size > 1) {
-                            drawPath(
-                                path = Path().apply {
-                                    points.forEachIndexed { index, point ->
-                                        if (index == 0) moveTo(
-                                            point.x,
-                                            point.y
-                                        ) else lineTo(point.x, point.y)
-                                    }
-                                },
-                                color = Color.White,
-                                style = Stroke(
-                                    width = 5f,
-                                    pathEffect = PathEffect.dashPathEffect(
-                                        floatArrayOf(10f, 10f),
-                                        0f
-                                    )
+                        }, measurePolicy = { measurables, constraints ->
+                            val imagePlaceable = measurables[0].measure(constraints)
+                            val canvasPlaceable = measurables[1].measure(
+                                constraints.copy(
+                                    maxWidth = imagePlaceable.width,
+                                    maxHeight = imagePlaceable.height
                                 )
                             )
+
+                            layout(imagePlaceable.width, imagePlaceable.height) {
+                                imagePlaceable.place(0, 0)
+                                canvasPlaceable.place(0, 0)
+                            }
                         }
-                    }
+                    )
                 }
             }
 
