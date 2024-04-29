@@ -378,16 +378,15 @@ class PolygonCropActivity : ComponentActivity() {
         val paint = android.graphics.Paint()
         paint.color = android.graphics.Color.YELLOW
         paint.style = android.graphics.Paint.Style.STROKE
-        paint.strokeWidth = borderSize.toFloat()
+        paint.strokeWidth = 0f
 
         val bmpWithBorder = Bitmap.createBitmap(bmp.width + 2*borderSize, bmp.height + 2*borderSize, bmp.config)
         val canvas = android.graphics.Canvas(bmpWithBorder)
         canvas.drawBitmap(bmp, borderSize.toFloat(), borderSize.toFloat(), null)
-        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat()-1, bmpWithBorder.height.toFloat()-1, paint)
+        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat(), bmpWithBorder.height.toFloat(), paint)
 
         return bmpWithBorder
     }
-
 }
 
 
