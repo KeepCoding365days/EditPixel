@@ -23,6 +23,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,20 +63,24 @@ class filter : AppCompatActivity() {
     @Composable
     fun Filters(bitmap: BitmapObject, callback: () -> Unit){
 
+        var applying by remember { mutableStateOf(false) }
+
+        var prev by remember { mutableStateOf(0)}
         var fnum by remember { mutableStateOf(0) }
 
         val image = bitmap.bitmap.asImageBitmap()
         val d = LocalDensity.current.density.toInt()
         val thumb = Bitmap.createScaledBitmap(image.asAndroidBitmap(),120*d,120*d, false).asImageBitmap()
 
-        val result = if (fnum != 0) {
-            applyFilter(image.asAndroidBitmap(), fnum)
+        val result = if (fnum != prev) {
+            applyFilter(image.asAndroidBitmap(), fnum, { value -> prev = value }, {value -> applying = value})
         } else {
-            image
+            applyFilter(image.asAndroidBitmap(), fnum, { value -> value }, {value -> value})
         }
+
         Column(modifier = Modifier
             .fillMaxSize()
-            .background(Color.hsv(243f, 0.54f, 0.23f)),verticalArrangement = Arrangement.Bottom) {
+            .background(Color.hsv(0f, 0f, 0f)),verticalArrangement = Arrangement.Bottom) {
             Image(
                 bitmap = result,
                 contentDescription = "some description",
@@ -108,11 +113,17 @@ class filter : AppCompatActivity() {
                     Text("Cancel")
                 }
             }
+
+            if (applying) {
+                Log.d("Decode","Loading Screen")
+                LoadingScreen()
+            }
         }
     }
 
     @Composable
     fun FilterButtons(bg : ImageBitmap, update : (Int) -> (Unit)) {
+        val names = arrayOf("Original", "Auto", "GreyScale", "Paris", "Invert", "Egypt", "Vintage")
         val scrollState = rememberScrollState()
 
         Row(modifier = Modifier
@@ -121,8 +132,12 @@ class filter : AppCompatActivity() {
             ,verticalAlignment = Alignment.CenterVertically)
         {
             repeat(7) { index ->
-                val newbg = applyFilter(bg.asAndroidBitmap() , index)
-                FilterButton(text = "Button", bg = newbg, i = index , { num -> update(num) })
+                val newbg = applyFilter(bg.asAndroidBitmap() , index, {value -> Log.d("Decode","Bg Filters 1")},{value -> Log.d("Decode","Bg Filters 2")})
+                var name = names.getOrNull(index)
+                if (name == null){
+                    name = "Undefined"
+                }
+                FilterButton(text = name, bg = newbg, i = index , { num -> update(num) })
             }
         }
     }
@@ -149,17 +164,23 @@ class filter : AppCompatActivity() {
                 modifier = Modifier.align(Alignment.Center))
         }
     }
-
-    fun save(){
-        Log.d("Decode","save")
+    @Composable
+    fun LoadingScreen() {
+        Log.d("Decode","Loading")
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color.Black)
+        }
     }
+    fun applyFilter(bitmap: Bitmap, fnum : Int, updatePrev: (Int) -> Unit, updateApplying: (Boolean) -> Unit) : ImageBitmap {
 
-    fun cancel(){
-        Log.d("Decode","cancel")
-    }
+        Log.d("Decode","Applying Filter")
 
-    fun applyFilter(bitmap: Bitmap, fnum : Int) : ImageBitmap {
-
+        updateApplying(true);
         val updated = if (fnum == 0){
             noFilter(bitmap)
         }
@@ -181,7 +202,8 @@ class filter : AppCompatActivity() {
         else{
             vintageFilter(bitmap)
         }
-
+        updatePrev(fnum);
+        updateApplying(false);
         return updated
     }
 
