@@ -1,6 +1,7 @@
 package com.example.editpixel
 
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -66,6 +67,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlin.math.sqrt
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
+import android.util.Log
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import kotlin.math.abs
 
 
 class Advance : AppCompatActivity() {
@@ -225,16 +238,33 @@ class Advance : AppCompatActivity() {
     fun UI() {
         // State to manage the visibility of the dialog
         var showDialog by remember { mutableStateOf(false) }
+        var cancelDialogVisible by remember { mutableStateOf(false) }
+        var saveDialogVisible  by remember { mutableStateOf(false) }
         val selectedColor = remember { mutableStateOf(Color.Black) }
         val ColorWidth = remember { mutableStateOf(4f) }
         var isEraserActive by remember { mutableStateOf(false) }
         var isBrushActive by remember { mutableStateOf(false) }
+        var isCloneActive by remember { mutableStateOf(false) }
+        var isSelectActive by remember { mutableStateOf(false) }
+        var isSelected by remember { mutableStateOf(false) }
+        var isSelecting by remember { mutableStateOf(false) }
         val lines = remember {
             mutableStateListOf<Line>()
         }
+        var startOffset by remember { mutableStateOf(Offset.Zero) }
+        var endOffset by remember { mutableStateOf(Offset.Zero) }
         val imageBitmap = BitmapObject.bitmap
+        val isMutable = imageBitmap.isMutable
+        val newBitmap = if (isMutable) imageBitmap else imageBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(newBitmap)
+        val density = LocalDensity.current.density
         val undoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
         val redoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
+        var size = Size.Zero
+        var topLeft = Offset.Zero
+
+        var clonedImage: Bitmap? = null
+
         val undo = {
             if (undoHistory.isNotEmpty()) {
                 val undoAction = undoHistory.removeLast()
@@ -284,42 +314,66 @@ class Advance : AppCompatActivity() {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-
             Box(
                 modifier = Modifier
-                    .height(250.dp)
-                    .fillMaxWidth()
+                    .size(width = imageBitmap.width.dp/2, height = imageBitmap.height.dp/2)
                     .border(1.dp, Color.White)
             ) {
+                val canvasWidth = size.width.toInt()
+                val canvasHeight = size.height.toInt()
+                println("The Width is: $canvasWidth")
+                println("The Height is: $canvasHeight")
+
+                val context = LocalContext.current
                 Canvas(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White)
                         .pointerInput(true) {
-                            detectDragGestures { change, dragAmount ->
+                            detectDragGestures {
+                                    change, dragAmount ->
                                 change.consume()
                                 val line = Line(
                                     start = change.position - dragAmount,
                                     end = change.position,
                                     color = selectedColor.value,
-                                    strokeWidth = ColorWidth.value.dp
+                                    strokeWidth = ColorWidth.value.dp,
                                 )
+                                if (!isSelecting && isSelectActive)
+                                {
+                                    startOffset=change.position - dragAmount
+                                    isSelecting=true
+                                }
+                                if(isCloneActive && !isSelected)
+                                {
+                                    startOffset=change.position - dragAmount
+                                    isSelected=true
+                                }
+                                endOffset = change.position
+
                                 if (isBrushActive) {
-                                    if (isInsideCanvas(
-                                            line.start,
-                                            size.width.toInt(),
-                                            size.height.toInt()
-                                        ) &&
-                                        isInsideCanvas(
-                                            line.end,
-                                            size.width.toInt(),
-                                            size.height.toInt()
-                                        )
-                                    ) {
-                                        // Store the complete line as a single action
-                                        undoHistory.add(EditAction.AddLine(line))
-                                        lines.add(line)
-                                    }
+//                                    if (isInsideCanvas(
+//                                            line.start,
+//                                            canvasWidth,
+//                                            canvasHeight
+//                                        ) &&
+//                                        isInsideCanvas(
+//                                            line.end,
+//                                            canvasWidth,
+//                                            canvasHeight
+//                                        )
+//                                    ) {
+//                                        // Store the complete line as a single action
+//                                        undoHistory.add(EditAction.AddLine(line))
+//                                        lines.add(line)
+//                                        println("Start: (${line.start.x}, ${line.end.y})")
+//                                        println("End: (${line.end.x}, ${line.end.y})")
+//
+//
+//
+//                                    }
+                                    undoHistory.add(EditAction.AddLine(line))
+                                    lines.add(line)
+
                                 } else if (isEraserActive) {
                                     // If the eraser is active, check if any existing lines are within the eraser touch area and remove them
                                     val touchPosition = change.position
@@ -333,12 +387,57 @@ class Advance : AppCompatActivity() {
                             }
                         }
                 ) {
-                    val canvasWidth = size.width.toInt()
-                    val canvasHeight = size.height.toInt()
+
+
                     drawImage(
                         image = imageBitmap.asImageBitmap(),
-                        dstSize = IntSize(canvasWidth, canvasHeight)
+                        topLeft = Offset.Zero
                     )
+
+                    if (isSelecting && isSelectActive)
+                    {
+                        topLeft = Offset(
+                            x = minOf(startOffset.x, endOffset.x),
+                            y = minOf(startOffset.y, endOffset.y)
+                        )
+                        size = Size(
+                            width = abs(startOffset.x - endOffset.x),
+                            height = abs(startOffset.y - endOffset.y)
+                        )
+                        drawRect(
+                            color = Color.Red,
+                            style = Stroke(2.dp.toPx()),
+                            topLeft = topLeft,
+                            size = size
+                        )
+                        val rect = Rect().apply {
+                            left = topLeft.x.toInt()
+                            top = topLeft.y.toInt()
+                            right = (topLeft.x + size.width).toInt()
+                            bottom = (topLeft.y + size.height).toInt()
+                        }
+                        val selectedBitmap = Bitmap.createBitmap(imageBitmap, rect.left, rect.top, rect.width(), rect.height())
+                        clonedImage = selectedBitmap
+
+
+                    }
+
+                    if(isSelected && isCloneActive)
+                    {
+
+                        clonedImage?.let { image ->
+                            drawImage(image.asImageBitmap(), topLeft = startOffset)
+//                            canvas.drawBitmap(image, startOffset.x, startOffset.y, null)
+                        }
+                        isSelected=false
+
+                    }
+
+
+                    // Extract the portion of the original image inside the rectangle
+
+                    // Assign the extracted bitmap to the clonedImage variable
+
                     lines.forEach { line ->
                         drawLine(
                             color = line.color,
@@ -348,7 +447,22 @@ class Advance : AppCompatActivity() {
                             cap = StrokeCap.Round
                         )
                     }
+                    lines.forEach{
+                            line ->
+                        val paint = Paint().apply {
+                            color = line.color.toArgb() // Set the color of the lines
+
+                            val width=line.strokeWidth.value * density
+                            strokeWidth = width // Set the stroke width of the lines
+                        }
+                        canvas.drawLine(line.start.x, line.start.y, line.end.x, line.end.y, paint)
+                    }
+
                 }
+
+
+
+
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
@@ -390,7 +504,7 @@ class Advance : AppCompatActivity() {
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
                     onClick = {
-                        onSavedBack(imageBitmap)
+                        saveDialogVisible = true
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 ) {
@@ -404,10 +518,13 @@ class Advance : AppCompatActivity() {
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
                     onClick = {
-                        onBack()
+                        //onBack()
+                        cancelDialogVisible = true
                     },
-                    modifier = Modifier.border(1.dp, Color.White)
-                ) {
+                    modifier = Modifier.border(1.dp, Color.White))
+                //modifier = Modifier.weight(0.5f).
+                //background(color=Color.Gray).padding(2.dp))
+                {
                     Icon(
                         imageVector = Icons.Filled.Clear,
                         contentDescription = "back Icon",
@@ -429,7 +546,45 @@ class Advance : AppCompatActivity() {
                         modifier = Modifier.size(32.dp)
                     )
                 }
+
             }
+            Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
+            Row{
+                IconButton(
+                    onClick={
+
+                        isSelecting=false
+                        isSelectActive=true
+                        isCloneActive=false
+                    },
+                    modifier = Modifier.border(1.dp, Color.White)
+                )
+                {
+                    Icon(
+                        imageVector=Icons.Filled.Refresh,
+                        contentDescription = "Select Icon",
+                        tint=Color.White,
+                        modifier=Modifier.size(32.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
+                IconButton(
+                    onClick={
+                        isCloneActive=true
+                        isSelectActive=false
+                    },
+                    modifier = Modifier.border(1.dp, Color.White)
+                )
+                {
+                    Icon(
+                        imageVector=Icons.Filled.Refresh,
+                        contentDescription = "Clone Icon",
+                        tint=Color.White,
+                        modifier=Modifier.size(32.dp)
+                    )
+                }
+            }
+
 
 
             // Show dialog when showDialog is true
@@ -442,6 +597,78 @@ class Advance : AppCompatActivity() {
                     }
                 )
             }
+
+            if (cancelDialogVisible) {
+
+                AlertDialog(
+                    onDismissRequest = { cancelDialogVisible = false },
+                    title = {
+                        Text(text = "Cancel")
+                    },
+                    text = {
+                        Text(text = "Are you sure you want to cancel?")
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                cancelDialogVisible = false
+                                onBack() // Call onBack if the user confirms cancellation
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { cancelDialogVisible = false }
+                        ) {
+                            Text("No")
+                        }
+                    }
+                )
+            }
+
+
+            // Code for the save confirmation dialog
+            if (saveDialogVisible) {
+                AlertDialog(
+                    onDismissRequest = { saveDialogVisible = false },
+                    title = {
+                        Text(text = "Save")
+                    },
+                    text = {
+                        Text(text = "Are you sure you want to save?")
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                saveDialogVisible = false
+                                // Perform save action here, e.g., call onSavedBack()
+
+                                clonedImage?.let { image ->
+                                    val den = Resources.getSystem().displayMetrics.density
+                                    val left = startOffset.x * den
+                                    val top = startOffset.y * density
+                                    canvas.drawBitmap(image, left, top, null)
+                                }
+
+                                onSavedBack(newBitmap)
+                            }
+                        ) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { saveDialogVisible = false }
+                        ) {
+                            Text("No")
+                        }
+                    }
+                )
+
+            }
+
         }
     }
 
