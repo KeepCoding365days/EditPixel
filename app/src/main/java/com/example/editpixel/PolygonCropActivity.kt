@@ -302,7 +302,7 @@ class PolygonCropActivity : ComponentActivity() {
             Bitmap.createBitmap(androidBitmap, minX, minY, (maxX - minX + 1), (maxY - minY + 1))
 
         //Flood outside pixels
-        croppedBitmap = addBorder(croppedBitmap, 1)
+        croppedBitmap = addBorder(croppedBitmap)
         val newImageBitmap: Bitmap = floodFill(croppedBitmap, 0, 0)
 
         return newImageBitmap.asImageBitmap()
@@ -374,16 +374,16 @@ class PolygonCropActivity : ComponentActivity() {
         return result
     }
 
-    private fun addBorder(bmp: Bitmap, borderSize: Int): Bitmap {
+    private fun addBorder(bmp: Bitmap): Bitmap {
         val paint = android.graphics.Paint()
         paint.color = android.graphics.Color.YELLOW
         paint.style = android.graphics.Paint.Style.STROKE
         paint.strokeWidth = 0f
 
-        val bmpWithBorder = Bitmap.createBitmap(bmp.width + 2*borderSize, bmp.height + 2*borderSize, bmp.config)
+        val bmpWithBorder = Bitmap.createBitmap(bmp.width + 2, bmp.height + 2, bmp.config)
         val canvas = android.graphics.Canvas(bmpWithBorder)
-        canvas.drawBitmap(bmp, borderSize.toFloat(), borderSize.toFloat(), null)
-        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat(), bmpWithBorder.height.toFloat(), paint)
+        canvas.drawBitmap(bmp, 1f, 1f, null)
+        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat() - 1, bmpWithBorder.height.toFloat() - 1, paint)
 
         return bmpWithBorder
     }
