@@ -141,7 +141,6 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         val canvas = Canvas(mutableBitmap)
         val paint = Paint()
 
-        // Create a color matrix. This matrix will be used to adjust the saturation
         val colorMatrix = ColorMatrix().apply {
             val scale = contrast + 1f
             val translate = -(128 * contrast) / 2
