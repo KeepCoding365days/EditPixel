@@ -1,7 +1,5 @@
 package com.example.editpixel
 
-import android.R.attr.x
-import android.R.attr.y
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -40,7 +38,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -83,6 +80,7 @@ class Advance : AppCompatActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black),
+                    color=Color.Black
                     //color = MaterialTheme.colorScheme.background
                 ) {
                     UI()
