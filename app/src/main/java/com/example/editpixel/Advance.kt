@@ -572,6 +572,9 @@ class Advance : AppCompatActivity() {
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
                     onClick={
+                        lines.clear()
+                        undoHistory.clear()
+                        redoHistory.clear()
                         isSelecting=false
                         isEraserActive = false
                         isBrushActive = false
@@ -593,6 +596,9 @@ class Advance : AppCompatActivity() {
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
                     onClick={
+                        lines.clear()
+                        redoHistory.clear()
+                        undoHistory.clear()
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
