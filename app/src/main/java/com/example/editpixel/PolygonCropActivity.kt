@@ -261,18 +261,6 @@ class PolygonCropActivity : ComponentActivity() {
             )).toMutableList()
         }
 
-        for (point in points) {
-            androidBitmap.setPixel(
-                point.x.toInt(),
-                point.y.toInt(),
-                android.graphics.Color.TRANSPARENT
-            )
-        }
-
-        for (point in tempList) {
-            androidBitmap.setPixel(point.first, point.second, android.graphics.Color.TRANSPARENT)
-        }
-
         var minX = tempList[0].first
         var minY = tempList[0].second
         var maxX = tempList[0].first
@@ -294,15 +282,31 @@ class PolygonCropActivity : ComponentActivity() {
         }
 
 
-        println("Corner points are: ${points.toList()}")
-        println("Intermediate points are: ${tempList.toList()}")
-        println("Start ${tempList[0]} and End ${tempList[tempList.size - 1]}")
+        //println("Corner points are: ${points.toList()}")
+        //println("Intermediate points are: ${tempList.toList()}")
+        //println("Start ${tempList[0]} and End ${tempList[tempList.size - 1]}")
 
         var croppedBitmap =
             Bitmap.createBitmap(androidBitmap, minX, minY, (maxX - minX + 1), (maxY - minY + 1))
 
+        //Add a border outside to 'connect' all outside pixels
+        croppedBitmap = addBorder(croppedBitmap, 1)
+
+        for (point in points) {
+            croppedBitmap.setPixel(
+                point.x.toInt() - minX + 1,
+                point.y.toInt() - minY + 1,
+                android.graphics.Color.TRANSPARENT
+            )
+        }
+
+        for (point in tempList) {
+            croppedBitmap.setPixel(point.first - minX + 1,
+                point.second - minY + 1,
+                android.graphics.Color.TRANSPARENT)
+        }
+
         //Flood outside pixels
-        croppedBitmap = addBorder(croppedBitmap)
         val newImageBitmap: Bitmap = floodFill(croppedBitmap, 0, 0)
 
         return newImageBitmap.asImageBitmap()
@@ -374,17 +378,17 @@ class PolygonCropActivity : ComponentActivity() {
         return result
     }
 
-    private fun addBorder(bmp: Bitmap): Bitmap {
-        val paint = android.graphics.Paint()
-        paint.color = android.graphics.Color.YELLOW
-        paint.style = android.graphics.Paint.Style.STROKE
-        paint.strokeWidth = 0f
+    private fun addBorder(bmp: Bitmap, borderSize: Int): Bitmap {
+        val bmpWithBorder = Bitmap.createBitmap(
+            bmp.getWidth() + borderSize * 2,
+            bmp.getHeight() + borderSize * 2,
+            Bitmap.Config.ARGB_8888
+        )
 
-        val bmpWithBorder = Bitmap.createBitmap(bmp.width + 2, bmp.height + 2, bmp.config)
         val canvas = android.graphics.Canvas(bmpWithBorder)
-        canvas.drawBitmap(bmp, 1f, 1f, null)
-        canvas.drawRect(0f, 0f, bmpWithBorder.width.toFloat() - 1, bmpWithBorder.height.toFloat() - 1, paint)
 
+        canvas.drawColor(android.graphics.Color.WHITE)
+        canvas.drawBitmap(bmp, borderSize.toFloat(), borderSize.toFloat(), null)
         return bmpWithBorder
     }
 }
