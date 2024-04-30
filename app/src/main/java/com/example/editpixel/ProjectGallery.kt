@@ -1,82 +1,80 @@
 package com.example.editpixel
 
 import android.Manifest
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
-import android.util.DisplayMetrics
+import android.provider.MediaStore
 import android.util.Log
-import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.example.editpixel.ui.theme.EditPixelTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.HorizontalAlignmentLine
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
+import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 
 class ProjectGallery : AppCompatActivity() {
     private var project_name:String=""
     private var file_name=""
     private var file_uri:Uri= Uri.EMPTY
+    companion object {
+        private const val TAG = "ProjectGallery"
+        private const val MY_PERMISSIONS_REQUEST_CAMERA = 101
+        private const val REQUEST_IMAGE_CAPTURE = 102
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
@@ -109,10 +107,27 @@ class ProjectGallery : AppCompatActivity() {
         }
 
     }
+    fun check_permission_cam() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+        } else {
+            launchCamera()
+        }
+    }
+
+    private fun launchCamera() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (cameraIntent.resolveActivity(packageManager) != null) {
+            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE)
+        } else {
+            Log.e(TAG, "Camera intent cannot be resolved")
+        }
+    }
+
     fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, filename: String) {
         Log.d(TAG,"Start of save")
         val obj=StorageHelper();
-        obj.AddtoProject(project_name,applicationContext,bitmap);
+        obj.AddtoProject(project_name,applicationContext,bitmap,"PNG");
     }
     fun ExtractBitmap(uri: Uri):Bitmap{
         val source= ImageDecoder.createSource(this.contentResolver,uri)
@@ -153,6 +168,7 @@ class ProjectGallery : AppCompatActivity() {
 
     @Composable
     fun Gallery(name: String?){
+
         val imagePaths = remember {
             mutableStateListOf<Uri>()
         }
@@ -160,19 +176,42 @@ class ProjectGallery : AppCompatActivity() {
             imagePaths.clear()
             imagePaths.addAll(uris)
             CoroutineScope(Dispatchers.Main).launch {
-                savetoApp(uris)
+                savetoApp(imagePaths)
+                setContent(){
+                    EditPixelTheme {
+                        Surface(
+                            modifier = Modifier,
+                            color= Color.DarkGray
+                        ) {
+                            Gallery(project_name)
+                        }
+                    }
+                }
             }
-            setContent(){
-                EditPixelTheme {
-                    Surface(
-                        modifier = Modifier,
-                        color= Color.DarkGray
-                    ) {
-                        Gallery(project_name)
+
+        }
+        val launcher_cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                // Get the URI of the captured image from the intent
+                val imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                imagePaths.clear()
+                imagePaths.add(imageUri)
+                CoroutineScope(Dispatchers.Main).launch {
+                    savetoApp(imagePaths)
+                    setContent(){
+                        EditPixelTheme {
+                            Surface(
+                                modifier = Modifier,
+                                color= Color.DarkGray
+                            ) {
+                                Gallery(project_name)
+                            }
+                        }
                     }
                 }
             }
         }
+
         var temp="a"
 
         var delBtn by remember {
@@ -343,6 +382,20 @@ class ProjectGallery : AppCompatActivity() {
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
+        /*SmallFloatingActionButton(
+            onClick = { check_permission_cam()
+                launchCamera()
+
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .offset(
+                    70.dp,
+                    100.dp
+                )
+        ) {
+            Icon(painter = painterResource(R.drawable.camera) , "Fap_Cam")
+        }*/
 
     }
 }

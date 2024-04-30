@@ -6,7 +6,6 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
@@ -31,6 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -234,12 +234,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         startActivity(i)
         finish()
     }
-    suspend fun saveToProject(composer_bitmap:Bitmap){
+    suspend fun saveToProject(composer_bitmap:Bitmap,format: String){
         val helper=StorageHelper()
         helper.AddtoProject(
             project_name,
             applicationContext,
-            composer_bitmap
+            composer_bitmap,
+            format
         )
     }
     suspend fun saveImage(composer_bitmap: Bitmap){
@@ -262,6 +263,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         }
         var selectedButton by remember { mutableStateOf("") }
         var saveButton by remember {
+            mutableStateOf(false)
+        }
+        var saveCopy by remember {
             mutableStateOf(false)
         }
         var cancelBtn by remember {
@@ -288,14 +292,18 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 Row(
                     modifier = Modifier.padding(vertical = 5.dp)
                 ) {
-                    TextButton(onClick = {cancelBtn=true}, modifier = Modifier.weight(1f).
-                        background(color=Color.Gray).padding(2.dp)){
+                    TextButton(onClick = {cancelBtn=true}, modifier = Modifier
+                        .weight(1f)
+                        .background(color = Color.Gray)
+                        .padding(2.dp)){
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="",tint=Color.White
                             )
                     }
 
-                    TextButton(onClick = {saveButton=true}, modifier = Modifier.weight(1f).
-                        background(color=Color.Black).padding(2.dp)){
+                    TextButton(onClick = {saveButton=true}, modifier = Modifier
+                        .weight(1f)
+                        .background(color = Color.Black)
+                        .padding(2.dp)){
                         Icon(imageVector = Icons.Filled.Done, contentDescription ="", tint = Color.White
 
                              )
@@ -322,6 +330,50 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
 
                     )
                 }
+                if(saveCopy){
+                    Dialog(onDismissRequest = { saveCopy=false
+
+                    }) {
+                        Column{
+                            Row {
+                                Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"PNG")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+
+                                }) {
+                                    Text(text = "PNG")
+                                }
+                                Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"JPEG")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false
+                                }
+
+                                }) {
+                                    Text(text = "JPEG")
+                                }
+                            }
+                            Row{
+                                Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"WEBP_LOSSY")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+
+                                }) {
+                                    Text(text = "LOSSY WEBP")
+                                }
+                                Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"WEBP_LOSSLESS")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+                                }) {
+                                    Text(text = "Lossless WEBP")
+                                }
+                            }
+                        }
+                    }
+                }
                 if(saveButton){
                     Dialog(onDismissRequest =
                     { saveButton=false }){
@@ -335,7 +387,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                 horizontalAlignment=Alignment.CenterHorizontally
                             ) {
                                 Text(text="How would you like to save your image?",
-                                    modifier=Modifier.padding(6.dp).weight(1f), textAlign = TextAlign.Center)
+                                    modifier= Modifier
+                                        .padding(6.dp)
+                                        .weight(1f), textAlign = TextAlign.Center)
                                 Row (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
                                     TextButton(onClick = {
                                         BitmapObject.bitmap=composer_bitmap
@@ -349,14 +403,17 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                         Text("Save")
                                     }
                                     TextButton(onClick = {
+                                            saveCopy=true
+                                        saveButton=false
+                                        /*composer_bitmap=ImgBitmap
                                         saveButton=false
                                         CoroutineScope(Dispatchers.Main).launch {
                                             saveToProject(composer_bitmap)
-                                            composer_bitmap=ImgBitmap
+                                        }*/
                                         }
 
-                                    },modifier=Modifier.weight(1f)) {
-                                        Text("Save a Copy")
+                                    ,modifier=Modifier.weight(1f)) {
+                                        Text("Save as")
                                     }
                                 }
                             }
@@ -473,7 +530,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),
                             value = colorTemperature,
                             onValueChange = { newValue ->
                                 colorTemperature = newValue},
@@ -490,7 +551,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if (selectedButton == "Saturation") {
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(value = saturation, onValueChange = { value ->
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),value = saturation, onValueChange = { value ->
                             saturation = value
                         }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(ImgBitmap,saturation)
                                 }, valueRange = 0f..100f)
@@ -499,7 +564,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 } else if (selectedButton == "Hue") {
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(value = hue, onValueChange = { value -> hue = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),value = hue, onValueChange = { value -> hue = value },
                             onValueChangeFinished = {
                                 composer_bitmap=adjustHue(ImgBitmap,hue)
                             },
@@ -510,7 +579,12 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if(selectedButton=="brightness"){
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally){
-                        Slider(value = brightness, onValueChange = { value -> brightness = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        )
+                            ,value = brightness, onValueChange = { value -> brightness = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
                             },
@@ -522,7 +596,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if(selectedButton=="contrast"){
                     //composer_bitmap=ImgBitmap
                     Column (horizontalAlignment = Alignment.CenterHorizontally){
-                        Slider(value = contrast, onValueChange = { value -> contrast = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black),
+                            value = contrast, onValueChange = { value -> contrast = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustContrast (ImgBitmap,contrast)
                             },
@@ -554,6 +632,42 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         modifier = Modifier.size(40.dp)
                     )
                     Text(text)
+                }
+            }
+        }
+    }
+    @Composable
+    fun FormatDropDown(bitmap:Bitmap){
+        var saveBtn by remember {
+            mutableStateOf(true)
+        }
+        if (saveBtn) {
+            Dialog(onDismissRequest = { saveBtn=false}) {
+                Column{
+                    Row {
+                        Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"PNG")}
+                        }) {
+                            Text(text = "PNG")
+                        }
+                        Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"JPEG")}
+                        }) {
+                            Text(text = "JPEG")
+                        }
+                    }
+                    Row{
+                        Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"WEBP_LOSSY")}
+                        }) {
+                            Text(text = "LOSSY WEBP")
+                        }
+                        Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"WEBP_LOSSLESS")}
+                        }) {
+                            Text(text = "Lossless WEBP")
+                        }
+                    }
                 }
             }
         }
