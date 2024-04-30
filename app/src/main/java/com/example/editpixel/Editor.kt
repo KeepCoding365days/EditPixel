@@ -1,47 +1,55 @@
 package com.example.editpixel
 import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.example.editpixel.BitmapObject
-import com.example.editpixel.R
-import com.example.editpixel.ui.theme.EditPixelTheme
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class Editor : AppCompatActivity() {
     private var ImgBitmap=BitmapObject.bitmap
@@ -222,12 +230,13 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         //startActivity(i)
         //finish()
     }
-    suspend fun saveToProject(composer_bitmap:Bitmap){
+    suspend fun saveToProject(composer_bitmap:Bitmap,format: String){
         val helper=StorageHelper()
         helper.AddtoProject(
             project_name,
             applicationContext,
-            composer_bitmap
+            composer_bitmap,
+            format
         )
     }
     suspend fun saveImage(composer_bitmap: Bitmap){
@@ -247,6 +256,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
         }
         var selectedButton by remember { mutableStateOf("") }
         var saveButton by remember {
+            mutableStateOf(false)
+        }
+        var saveCopy by remember {
             mutableStateOf(false)
         }
         var cancelBtn by remember {
@@ -273,14 +285,18 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 Row(
                     modifier = Modifier.padding(vertical = 5.dp)
                 ) {
-                    TextButton(onClick = {cancelBtn=true}, modifier = Modifier.weight(1f).
-                        background(color=Color.Gray).padding(2.dp)){
+                    TextButton(onClick = {cancelBtn=true}, modifier = Modifier
+                        .weight(1f)
+                        .background(color = Color.Gray)
+                        .padding(2.dp)){
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription ="",tint=Color.White
                             )
                     }
 
-                    TextButton(onClick = {saveButton=true}, modifier = Modifier.weight(1f).
-                        background(color=Color.Black).padding(2.dp)){
+                    TextButton(onClick = {saveButton=true}, modifier = Modifier
+                        .weight(1f)
+                        .background(color = Color.Black)
+                        .padding(2.dp)){
                         Icon(imageVector = Icons.Filled.Done, contentDescription ="", tint = Color.White
 
                              )
@@ -307,6 +323,50 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
 
                     )
                 }
+                if(saveCopy){
+                    Dialog(onDismissRequest = { saveCopy=false
+
+                    }) {
+                        Column{
+                            Row {
+                                Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"PNG")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+
+                                }) {
+                                    Text(text = "PNG")
+                                }
+                                Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"JPEG")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false
+                                }
+
+                                }) {
+                                    Text(text = "JPEG")
+                                }
+                            }
+                            Row{
+                                Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"WEBP_LOSSY")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+
+                                }) {
+                                    Text(text = "LOSSY WEBP")
+                                }
+                                Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                                    saveToProject(composer_bitmap,"WEBP_LOSSLESS")
+                                    composer_bitmap=ImgBitmap
+                                    saveCopy=false}
+                                }) {
+                                    Text(text = "Lossless WEBP")
+                                }
+                            }
+                        }
+                    }
+                }
                 if(saveButton){
                     Dialog(onDismissRequest =
                     { saveButton=false }){
@@ -320,7 +380,9 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                 horizontalAlignment=Alignment.CenterHorizontally
                             ) {
                                 Text(text="How would you like to save your image?",
-                                    modifier=Modifier.padding(6.dp).weight(1f), textAlign = TextAlign.Center)
+                                    modifier= Modifier
+                                        .padding(6.dp)
+                                        .weight(1f), textAlign = TextAlign.Center)
                                 Row (horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.weight(1f)) {
                                     TextButton(onClick = {
                                         BitmapObject.bitmap=composer_bitmap
@@ -334,14 +396,17 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                                         Text("Save")
                                     }
                                     TextButton(onClick = {
-                                        composer_bitmap=ImgBitmap
+                                            saveCopy=true
+                                        saveButton=false
+                                        /*composer_bitmap=ImgBitmap
                                         saveButton=false
                                         CoroutineScope(Dispatchers.Main).launch {
                                             saveToProject(composer_bitmap)
+                                        }*/
                                         }
 
-                                    },modifier=Modifier.weight(1f)) {
-                                        Text("Save a Copy")
+                                    ,modifier=Modifier.weight(1f)) {
+                                        Text("Save as")
                                     }
                                 }
                             }
@@ -539,6 +604,42 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                         modifier = Modifier.size(40.dp)
                     )
                     Text(text)
+                }
+            }
+        }
+    }
+    @Composable
+    fun FormatDropDown(bitmap:Bitmap){
+        var saveBtn by remember {
+            mutableStateOf(true)
+        }
+        if (saveBtn) {
+            Dialog(onDismissRequest = { saveBtn=false}) {
+                Column{
+                    Row {
+                        Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"PNG")}
+                        }) {
+                            Text(text = "PNG")
+                        }
+                        Button(onClick = {CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"JPEG")}
+                        }) {
+                            Text(text = "JPEG")
+                        }
+                    }
+                    Row{
+                        Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"WEBP_LOSSY")}
+                        }) {
+                            Text(text = "LOSSY WEBP")
+                        }
+                        Button(onClick = { CoroutineScope(Dispatchers.Main).launch {
+                            saveToProject(bitmap,"WEBP_LOSSLESS")}
+                        }) {
+                            Text(text = "Lossless WEBP")
+                        }
+                    }
                 }
             }
         }

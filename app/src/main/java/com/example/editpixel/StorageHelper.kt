@@ -11,7 +11,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 
@@ -19,7 +18,7 @@ import java.io.IOException
 class StorageHelper {
 
     fun StorageHelper(){}
-    fun AddtoProject(name:String,context: Context, bitmap: Bitmap):String{
+    fun AddtoProject(name:String,context: Context, bitmap: Bitmap,format:String):String{
         val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         Log.d(ContentValues.TAG,"folderName"+name)
         val dir= File(storageDir,name)
@@ -33,11 +32,35 @@ class StorageHelper {
             var count=dir.listFiles()?.size ?:0
             count=count+1
             file=count.toString()
-            file= "$file.png"
+            if(format.equals("PNG")){
+                file= "$file.png"
+            }
+            else if(format.equals("JPEG")){
+                file= "$file.jpeg"
+            }
+            else if(format.equals("WEBP_LOSSY")){
+                file= "$file.webp"
+            }
+            else{
+                file= "$file.webp"
+            }
+
             val imageFile = File(dir, file)
             try {
                 FileOutputStream(imageFile).use { fos ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                    if(format.equals("PNG")){
+                        bitmap.compress(Bitmap.CompressFormat.PNG,100, fos)
+                    }
+                    else if(format.equals("JPEG")){
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100, fos)
+                    }
+                    else if(format.equals("WEBP_LOSSY")){
+                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY,100, fos)
+                    }
+                    else{
+                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSLESS,100,fos)
+                    }
+
                 }
                 Log.d("IMAGE_SAVE", "Image saved to ${imageFile.absolutePath}")
                 Toast.makeText(context, "Image copy saved", Toast.LENGTH_SHORT).show()
