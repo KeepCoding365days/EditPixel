@@ -75,9 +75,11 @@ class crop :AppCompatActivity() {
         startActivity(i)
         finish()
     }
+
     @Composable
     fun HomeScreen(context: Context) {
         val context = LocalContext.current
+        val originalBitmap by remember { mutableStateOf<Bitmap>(BitmapObject.bitmap.copy(BitmapObject.bitmap.config, false)) }
         var bitmap by remember { mutableStateOf<Bitmap>(BitmapObject.bitmap) }
         var imageUri by remember { mutableStateOf<Uri?>(null) }
         val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
@@ -124,10 +126,17 @@ class crop :AppCompatActivity() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(onClick = { val i=Intent(context,Editor::class.java)
-                        startActivity(i)
+                    startActivity(i)
                     finish()
                 }) {
                     Text("Back")
+                }
+
+                Button(onClick = {
+                    bitmap = originalBitmap
+                    imageUri = bitmapToUri(context, bitmap)
+                }) {
+                    Text("Undo")
                 }
 
                 Button(onClick = {
@@ -148,7 +157,7 @@ class crop :AppCompatActivity() {
                     Image(
                         bitmap = bitmap?.asImageBitmap()!!,
                         contentDescription = null,
-                        contentScale = ContentScale.Fit,
+                        // contentScale = ContentScale.Fit,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
