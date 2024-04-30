@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -58,6 +59,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -101,6 +103,19 @@ class ProjectGallery : AppCompatActivity() {
             )
         }
 
+    }
+    fun check_permission_cam(){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                MainActivity.MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE
+            )
+        }
     }
     fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, filename: String) {
         Log.d(TAG,"Start of save")
@@ -146,6 +161,7 @@ class ProjectGallery : AppCompatActivity() {
 
     @Composable
     fun Gallery(name: String?){
+
         val imagePaths = remember {
             mutableStateListOf<Uri>()
         }
@@ -153,7 +169,7 @@ class ProjectGallery : AppCompatActivity() {
             imagePaths.clear()
             imagePaths.addAll(uris)
             CoroutineScope(Dispatchers.Main).launch {
-                savetoApp(uris)
+                savetoApp(imagePaths)
             }
             setContent(){
                 EditPixelTheme {
@@ -166,6 +182,28 @@ class ProjectGallery : AppCompatActivity() {
                 }
             }
         }
+        val launcher_cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                // Get the URI of the captured image from the intent
+                val imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                imagePaths.clear()
+                imagePaths.add(imageUri)
+                CoroutineScope(Dispatchers.Main).launch {
+                    savetoApp(imagePaths)
+                    setContent(){
+                        EditPixelTheme {
+                            Surface(
+                                modifier = Modifier,
+                                color= Color.DarkGray
+                            ) {
+                                Gallery(project_name)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         var temp="a"
 
         var delBtn by remember {
@@ -335,6 +373,20 @@ class ProjectGallery : AppCompatActivity() {
                 )
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
+        }
+        SmallFloatingActionButton(
+            onClick = { check_permission_cam()
+                launcher_cam.launch(null)
+
+            },
+            modifier = Modifier
+                .padding(16.dp)
+                .offset(
+                    70.dp,
+                    100.dp
+                )
+        ) {
+            Icon(painter = painterResource(R.drawable.camera) , "Fap_Cam")
         }
 
     }
