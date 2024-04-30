@@ -30,6 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -523,7 +524,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if (selectedButton == "Colors") { // Assuming "Color Palette" is the text for the button
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),
                             value = colorTemperature,
                             onValueChange = { newValue ->
                                 colorTemperature = newValue},
@@ -540,7 +545,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if (selectedButton == "Saturation") {
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(value = saturation, onValueChange = { value ->
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),value = saturation, onValueChange = { value ->
                             saturation = value
                         }, onValueChangeFinished = {composer_bitmap=changeBitmapSaturation(ImgBitmap,saturation)
                                 }, valueRange = 0f..100f)
@@ -549,7 +558,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 } else if (selectedButton == "Hue") {
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(value = hue, onValueChange = { value -> hue = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        ),value = hue, onValueChange = { value -> hue = value },
                             onValueChangeFinished = {
                                 composer_bitmap=adjustHue(ImgBitmap,hue)
                             },
@@ -560,7 +573,12 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if(selectedButton=="brightness"){
                     //composer_bitmap=ImgBitmap
                     Column(horizontalAlignment = Alignment.CenterHorizontally){
-                        Slider(value = brightness, onValueChange = { value -> brightness = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black
+                        )
+                            ,value = brightness, onValueChange = { value -> brightness = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
                             },
@@ -572,7 +590,11 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                 else if(selectedButton=="contrast"){
                     //composer_bitmap=ImgBitmap
                     Column (horizontalAlignment = Alignment.CenterHorizontally){
-                        Slider(value = contrast, onValueChange = { value -> contrast = value },
+                        Slider(colors = SliderDefaults.colors(
+                            thumbColor = Color.Gray,
+                            activeTrackColor = Color.LightGray,
+                            inactiveTrackColor = Color.Black),
+                            value = contrast, onValueChange = { value -> contrast = value },
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustContrast (ImgBitmap,contrast)
                             },

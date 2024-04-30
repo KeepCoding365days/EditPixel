@@ -1,7 +1,6 @@
 package com.example.editpixel
 
 import android.Manifest
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -59,7 +58,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -72,6 +70,11 @@ class ProjectGallery : AppCompatActivity() {
     private var project_name:String=""
     private var file_name=""
     private var file_uri:Uri= Uri.EMPTY
+    companion object {
+        private const val TAG = "ProjectGallery"
+        private const val MY_PERMISSIONS_REQUEST_CAMERA = 101
+        private const val REQUEST_IMAGE_CAPTURE = 102
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         supportActionBar?.hide()
         super.onCreate(savedInstanceState)
@@ -104,19 +107,23 @@ class ProjectGallery : AppCompatActivity() {
         }
 
     }
-    fun check_permission_cam(){
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                MainActivity.MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE
-            )
+    fun check_permission_cam() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+        } else {
+            launchCamera()
         }
     }
+
+    private fun launchCamera() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        if (cameraIntent.resolveActivity(packageManager) != null) {
+            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE)
+        } else {
+            Log.e(TAG, "Camera intent cannot be resolved")
+        }
+    }
+
     fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, filename: String) {
         Log.d(TAG,"Start of save")
         val obj=StorageHelper();
@@ -170,17 +177,18 @@ class ProjectGallery : AppCompatActivity() {
             imagePaths.addAll(uris)
             CoroutineScope(Dispatchers.Main).launch {
                 savetoApp(imagePaths)
-            }
-            setContent(){
-                EditPixelTheme {
-                    Surface(
-                        modifier = Modifier,
-                        color= Color.DarkGray
-                    ) {
-                        Gallery(project_name)
+                setContent(){
+                    EditPixelTheme {
+                        Surface(
+                            modifier = Modifier,
+                            color= Color.DarkGray
+                        ) {
+                            Gallery(project_name)
+                        }
                     }
                 }
             }
+
         }
         val launcher_cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
@@ -374,9 +382,9 @@ class ProjectGallery : AppCompatActivity() {
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
-        SmallFloatingActionButton(
+        /*SmallFloatingActionButton(
             onClick = { check_permission_cam()
-                launcher_cam.launch(null)
+                launchCamera()
 
             },
             modifier = Modifier
@@ -387,7 +395,7 @@ class ProjectGallery : AppCompatActivity() {
                 )
         ) {
             Icon(painter = painterResource(R.drawable.camera) , "Fap_Cam")
-        }
+        }*/
 
     }
 }

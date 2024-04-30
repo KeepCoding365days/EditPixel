@@ -75,10 +75,10 @@ class StorageHelper {
     }
     fun exportFileToGallery(context: Context, sourceUri:Uri) {
         // Create an image file name
-        val imageFileName = "EditPixel" + sourceUri.lastPathSegment + ".png"
+        val imageFileName = "EditPixel" + sourceUri.lastPathSegment
         val values = ContentValues()
         values.put(MediaStore.Images.Media.DISPLAY_NAME, imageFileName)
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/"+sourceUri.lastPathSegment)
         values.put(
             MediaStore.Images.Media.RELATIVE_PATH,
             Environment.DIRECTORY_PICTURES
