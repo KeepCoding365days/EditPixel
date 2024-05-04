@@ -23,8 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +40,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.editpixel.ui.theme.EditPixelTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class filter : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,66 +68,129 @@ class filter : AppCompatActivity() {
         finish()
     }
     @Composable
-    fun Filters(bitmap: BitmapObject, callback: () -> Unit){
+    fun Filters(bitmap: BitmapObject, callback: () -> Unit) {
 
-        var applying by remember { mutableStateOf(false) }
-
-        var prev by remember { mutableStateOf(0)}
         var fnum by remember { mutableStateOf(0) }
 
-        val image = bitmap.bitmap.asImageBitmap()
         val d = LocalDensity.current.density.toInt()
-        val thumb = Bitmap.createScaledBitmap(image.asAndroidBitmap(),120*d,120*d, false).asImageBitmap()
 
-        val result = if (fnum != prev) {
-            applyFilter(image.asAndroidBitmap(), fnum, { value -> prev = value }, {value -> applying = value})
+        val original = bitmap.bitmap.asImageBitmap()
+        val aspectRatio = original.width.toFloat() / original.height.toFloat()
+
+        val newWidth = 120 * d
+        val newHeight = (newWidth / aspectRatio).toInt()
+
+        val preview = if (newWidth >= original.width.toFloat()) {
+            bitmap.bitmap.asImageBitmap()
         } else {
-            applyFilter(image.asAndroidBitmap(), fnum, { value -> value }, {value -> value})
+            Bitmap.createScaledBitmap(original.asAndroidBitmap(), newWidth, newHeight, false)
+                .asImageBitmap()
+        }
+        val thumb = Bitmap.createScaledBitmap(preview.asAndroidBitmap(), 30 * d, 30 * d, false)
+            .asImageBitmap()
+
+
+        Log.d("Decode", fnum.toString())
+
+        var isLoading by remember { mutableStateOf(false) }
+        var imagepreview = applyFilter(preview.asAndroidBitmap(), fnum)
+
+        fun applyFilterToOriginal() {
+            isLoading = true
+            CoroutineScope(Dispatchers.Default).launch {
+                BitmapObject.bitmap =
+                    applyFilter(original.asAndroidBitmap(), fnum).asAndroidBitmap()
+                // Update the UI on the main thread
+                withContext(Dispatchers.Main) {
+                    callback()
+                }
+            }
         }
 
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.hsv(0f, 0f, 0f)),verticalArrangement = Arrangement.Bottom) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.hsv(0f, 0f, 0f)), verticalArrangement = Arrangement.Bottom
+        ) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
+//                    Button(
+//                        shape = RoundedCornerShape(0),
+//                        onClick = { callback() },
+//                        modifier = Modifier
+//                            .height(50.dp)
+//                            .padding(2.dp),
+//                        colors = ButtonDefaults.buttonColors(
+//                            contentColor = Color.White,
+//                            containerColor = Color.Black
+//                        )
+//
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Filled.ArrowBack,
+//                            contentDescription = "",
+//                            tint = Color.White
+//                        )
+//                    }
+                }
+            }
+            Row {
+                Button(
+                    shape = RoundedCornerShape(0),
+                    onClick = { fnum = 0; callback() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                        .padding(2.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color.Gray
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "",
+                        tint = Color.White
+                    )
+                }
+                Button(
+                    shape = RoundedCornerShape(0),
+                    onClick = { applyFilterToOriginal() },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                        .padding(2.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = Color.White,
+                        containerColor = Color.Black
+                    )
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "",
+                        tint = Color.White
+                    )
+                }
+            }
+
             Image(
-                bitmap = result,
+                bitmap = imagepreview,
                 contentDescription = "some description",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(top = 20.dp, end = 5.dp, start = 5.dp, bottom = 0.dp)
             )
-            FilterButtons(thumb){newFnum -> fnum = newFnum}
-
-            Row{
-                Button(
-                    shape = RoundedCornerShape(0),
-                    onClick = { BitmapObject.bitmap = result.asAndroidBitmap(); fnum = 0; callback() },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = Color.hsv(213f, 0.66f, 0.78f))
-                ) {
-                    Text("Save")
-                }
-                Button(
-                    shape = RoundedCornerShape(0),
-                    onClick = { fnum = 0; callback() },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(contentColor = Color.White, containerColor = Color.DarkGray)
-                ) {
-                    Text("Cancel")
-                }
-            }
-
-            if (applying) {
-                Log.d("Decode","Loading Screen")
-                LoadingScreen()
-            }
+            FilterButtons(thumb) { newFnum -> fnum = newFnum }
         }
     }
-
     @Composable
     fun FilterButtons(bg : ImageBitmap, update : (Int) -> (Unit)) {
         val names = arrayOf("Original", "Auto", "GreyScale", "Paris", "Invert", "Egypt", "Vintage")
@@ -132,7 +202,7 @@ class filter : AppCompatActivity() {
             ,verticalAlignment = Alignment.CenterVertically)
         {
             repeat(7) { index ->
-                val newbg = applyFilter(bg.asAndroidBitmap() , index, {value -> Log.d("Decode","Bg Filters 1")},{value -> Log.d("Decode","Bg Filters 2")})
+                val newbg = applyFilter(bg.asAndroidBitmap() , index)
                 var name = names.getOrNull(index)
                 if (name == null){
                     name = "Undefined"
@@ -144,43 +214,32 @@ class filter : AppCompatActivity() {
 
     @Composable
     fun FilterButton(text: String, bg: ImageBitmap, i : Int, update: (Int) -> Unit){
-        Box(
-            Modifier
-                .fillMaxWidth()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
                 .padding(start = 2.dp, end = 2.dp, top = 4.dp, bottom = 4.dp)
-                .clickable { update(i) }){
+                .clickable { update(i) }
+                .clip(RoundedCornerShape(5.dp))
+        ){
+            Text(
+                text=text,
+                color= Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
             Image(
                 bitmap = bg,
                 contentDescription = null,
                 modifier = Modifier
                     .height(120.dp)
                     .width(120.dp)
-                    .clip(RoundedCornerShape(5.dp))
             )
-            Text(
-                text=text,
-                color= Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Center))
         }
     }
-    @Composable
-    fun LoadingScreen() {
-        Log.d("Decode","Loading")
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = Color.Black)
-        }
-    }
-    fun applyFilter(bitmap: Bitmap, fnum : Int, updatePrev: (Int) -> Unit, updateApplying: (Boolean) -> Unit) : ImageBitmap {
+    fun applyFilter(bitmap: Bitmap, fnum : Int) : ImageBitmap {
 
         Log.d("Decode","Applying Filter")
-
-        updateApplying(true);
+        Log.d("Decode",fnum.toString())
         val updated = if (fnum == 0){
             noFilter(bitmap)
         }
@@ -202,11 +261,7 @@ class filter : AppCompatActivity() {
         else{
             vintageFilter(bitmap)
         }
-        updatePrev(fnum);
-        updateApplying(false);
+        Log.d("Decode","Done Applying")
         return updated
     }
-
-
-
 }
