@@ -153,7 +153,7 @@ class crop :AppCompatActivity() {
                     BitmapObject.bitmap= bitmap
                     saveBitmapToFile(context, bitmap)
                 }) {
-                    Text("Save as sticker")
+                    Text("Save")
                 }
             }
 
@@ -196,6 +196,13 @@ class crop :AppCompatActivity() {
                 }) {
                     Text("Polygon Crop")
                 }
+
+                Button(onClick = {
+                    val intent = Intent(context, StickerApplier::class.java)
+                    context.startActivity(intent)
+                }) {
+                    Text("Sticker")
+                }
             }
         }
     }
@@ -229,7 +236,6 @@ class crop :AppCompatActivity() {
                     outputStream?.flush()
                     outputStream?.close()
                 }
-                Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
 
                 // Broadcasting to make the image available in the gallery immediately
                 val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
