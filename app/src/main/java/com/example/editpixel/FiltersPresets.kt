@@ -2,6 +2,7 @@ package com.example.editpixel
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 
@@ -43,7 +44,6 @@ fun autoFilter(originalBitmap: Bitmap): ImageBitmap{
 fun invertFilter(originalBitmap: Bitmap): ImageBitmap {
 
     val editable = originalBitmap.copy(Bitmap.Config.ARGB_8888, true)
-
     for (x in 0 until editable.width) {
         for (y in 0 until editable.height) {
             val pixel = editable.getPixel(x, y)
