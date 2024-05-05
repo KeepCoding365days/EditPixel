@@ -36,6 +36,8 @@
             android:exported="false" />
         <activity android:name=".PolygonCropActivity"
             android:exported="false"/>
+        <activity android:name=".StickerApplier"
+            android:exported="false"/>
         <activity
         android:name=".Advance"
         android:exported="false" />
