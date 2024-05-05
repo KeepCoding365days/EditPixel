@@ -54,7 +54,11 @@ import okio.IOException
 import java.io.File
 import java.io.FileOutputStream
 
+object BitmapHolder {
+    var originalBitmap: Bitmap? = null
+}
 class crop :AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -68,6 +72,9 @@ class crop :AppCompatActivity() {
                 }
             }
         }
+        if (BitmapHolder.originalBitmap == null) {
+            BitmapHolder.originalBitmap = BitmapObject.bitmap.copy(BitmapObject.bitmap.config, false)
+        }
     }
     fun BacktoEditor(){
         //BitmapObject.bitmap=ur bitmap
@@ -76,10 +83,13 @@ class crop :AppCompatActivity() {
         finish()
     }
 
+
+
     @Composable
     fun HomeScreen(context: Context) {
+        val originalBitmap = BitmapHolder.originalBitmap
         val context = LocalContext.current
-        val originalBitmap by remember { mutableStateOf<Bitmap>(BitmapObject.bitmap.copy(BitmapObject.bitmap.config, false)) }
+      //  val originalBitmap by remember { mutableStateOf<Bitmap>(BitmapObject.bitmap.copy(BitmapObject.bitmap.config, false)) }
         var bitmap by remember { mutableStateOf<Bitmap>(BitmapObject.bitmap) }
         var imageUri by remember { mutableStateOf<Uri?>(null) }
         val imageCropLauncher = rememberLauncherForActivityResult(CropImageContract()) { result ->
@@ -133,7 +143,7 @@ class crop :AppCompatActivity() {
                 }
 
                 Button(onClick = {
-                    bitmap = originalBitmap
+                    bitmap = originalBitmap ?: throw IllegalStateException("Original bitmap is null")
                     imageUri = bitmapToUri(context, bitmap)
                 }) {
                     Text("Undo")
