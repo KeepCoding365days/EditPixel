@@ -16,6 +16,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +28,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
@@ -51,16 +55,20 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -73,8 +81,191 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.platform.LocalConfiguration
+
 
 class Advance : AppCompatActivity() {
+
+    @Composable
+    fun rememberContentCopy(): ImageVector {
+        return remember {
+            ImageVector.Builder(
+                name = "content_copy",
+                defaultWidth = 40.0.dp,
+                defaultHeight = 40.0.dp,
+                viewportWidth = 40.0f,
+                viewportHeight = 40.0f
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                    fillAlpha = 1f,
+                    stroke = null,
+                    strokeAlpha = 1f,
+                    strokeLineWidth = 1.0f,
+                    strokeLineCap = StrokeCap.Butt,
+                    strokeLineJoin = StrokeJoin.Miter,
+                    strokeLineMiter = 1f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(13.292f, 30.958f)
+                    quadToRelative(-1.084f, 0f, -1.875f, -0.77f)
+                    quadToRelative(-0.792f, -0.771f, -0.792f, -1.855f)
+                    verticalLineToRelative(-22f)
+                    quadToRelative(0f, -1.083f, 0.792f, -1.854f)
+                    quadToRelative(0.791f, -0.771f, 1.875f, -0.771f)
+                    horizontalLineToRelative(17.083f)
+                    quadToRelative(1.083f, 0f, 1.854f, 0.771f)
+                    quadTo(33f, 5.25f, 33f, 6.333f)
+                    verticalLineToRelative(22f)
+                    quadToRelative(0f, 1.084f, -0.771f, 1.855f)
+                    quadToRelative(-0.771f, 0.77f, -1.854f, 0.77f)
+                    close()
+                    moveToRelative(0f, -2.625f)
+                    horizontalLineToRelative(17.083f)
+                    verticalLineToRelative(-22f)
+                    horizontalLineTo(13.292f)
+                    verticalLineToRelative(22f)
+                    close()
+                    moveTo(8f, 36.25f)
+                    quadToRelative(-1.083f, 0f, -1.854f, -0.771f)
+                    quadToRelative(-0.771f, -0.771f, -0.771f, -1.854f)
+                    verticalLineTo(10.792f)
+                    quadToRelative(0f, -0.542f, 0.375f, -0.938f)
+                    quadToRelative(0.375f, -0.396f, 0.917f, -0.396f)
+                    quadToRelative(0.583f, 0f, 0.958f, 0.396f)
+                    reflectiveQuadToRelative(0.375f, 0.938f)
+                    verticalLineToRelative(22.833f)
+                    horizontalLineToRelative(17.625f)
+                    quadToRelative(0.5f, 0f, 0.896f, 0.375f)
+                    reflectiveQuadToRelative(0.396f, 0.917f)
+                    quadToRelative(0f, 0.583f, -0.396f, 0.958f)
+                    reflectiveQuadToRelative(-0.896f, 0.375f)
+                    close()
+                    moveToRelative(5.292f, -29.917f)
+                    verticalLineToRelative(22f)
+                    verticalLineToRelative(-22f)
+                    close()
+                }
+            }.build()
+        }
+    }
+
+    private fun path(
+        fill: SolidColor,
+        fillAlpha: Float,
+        stroke: Nothing?,
+        strokeAlpha: Float,
+        strokeLineWidth: Float,
+        strokeLineCap: StrokeCap,
+        strokeLineJoin: Any,
+        strokeLineMiter: Float,
+        pathFillType: Any,
+        function: () -> Unit
+    ) {
+
+    }
+    @Composable
+    fun rememberBrushIcon(): ImageVector {
+        return remember {
+            ImageVector.Builder(
+                name = "brush",
+                defaultWidth = 40.0.dp,
+                defaultHeight = 40.0.dp,
+                viewportWidth = 40.0f,
+                viewportHeight = 40.0f
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                    fillAlpha = 1f,
+                    stroke = null,
+                    strokeAlpha = 1f,
+                    strokeLineWidth = 1.0f,
+                    strokeLineCap = StrokeCap.Butt,
+                    strokeLineJoin = StrokeJoin.Miter,
+                    strokeLineMiter = 1f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(12.0f, 32.0f)
+                    lineTo(12.0f, 28.0f)
+                    lineTo(16.0f, 28.0f)
+                    lineTo(16.0f, 32.0f)
+                    lineTo(12.0f, 32.0f)
+                    close()
+                    moveTo(16.0f, 24.0f)
+                    lineTo(20.0f, 24.0f)
+                    lineTo(20.0f, 28.0f)
+                    lineTo(16.0f, 28.0f)
+                    lineTo(16.0f, 24.0f)
+                    close()
+                    moveTo(20.0f, 16.0f)
+                    lineTo(24.0f, 16.0f)
+                    lineTo(24.0f, 24.0f)
+                    lineTo(20.0f, 24.0f)
+                    lineTo(20.0f, 16.0f)
+                    close()
+                    moveTo(24.0f, 8.0f)
+                    lineTo(28.0f, 8.0f)
+                    lineTo(28.0f, 16.0f)
+                    lineTo(24.0f, 16.0f)
+                    lineTo(24.0f, 8.0f)
+                    close()
+                }
+            }.build()
+        }
+    }
+
+    @Composable
+    fun rememberArrowSelectorTool(): ImageVector {
+        return remember {
+            ImageVector.Builder(
+                name = "arrow_selector_tool",
+                defaultWidth = 40.0.dp,
+                defaultHeight = 40.0.dp,
+                viewportWidth = 40.0f,
+                viewportHeight = 40.0f
+            ).apply {
+                path(
+                    fill = SolidColor(Color.Black),
+                    fillAlpha = 1f,
+                    stroke = null,
+                    strokeAlpha = 1f,
+                    strokeLineWidth = 1.0f,
+                    strokeLineCap = StrokeCap.Butt,
+                    strokeLineJoin = StrokeJoin.Miter,
+                    strokeLineMiter = 1f,
+                    pathFillType = PathFillType.NonZero
+                ) {
+                    moveTo(12.708f, 24.875f)
+                    lineToRelative(4.209f, -5.917f)
+                    horizontalLineTo(25.5f)
+                    lineTo(12.708f, 8.875f)
+                    close()
+                    moveToRelative(12.5f, 10.667f)
+                    quadToRelative(-0.833f, 0.416f, -1.646f, 0.104f)
+                    quadToRelative(-0.812f, -0.313f, -1.229f, -1.146f)
+                    lineToRelative(-5.208f, -11.208f)
+                    lineToRelative(-4.667f, 6.458f)
+                    quadToRelative(-0.583f, 0.792f, -1.479f, 0.5f)
+                    quadToRelative(-0.896f, -0.292f, -0.896f, -1.25f)
+                    verticalLineTo(6.208f)
+                    quadToRelative(0f, -0.833f, 0.75f, -1.187f)
+                    quadToRelative(0.75f, -0.354f, 1.375f, 0.146f)
+                    lineToRelative(17.959f, 14.041f)
+                    quadToRelative(0.708f, 0.625f, 0.395f, 1.5f)
+                    quadToRelative(-0.312f, 0.875f, -1.27f, 0.875f)
+                    horizontalLineToRelative(-8.209f)
+                    lineToRelative(5.125f, 11.125f)
+                    quadToRelative(0.417f, 0.834f, 0.104f, 1.646f)
+                    quadToRelative(-0.312f, 0.813f, -1.104f, 1.188f)
+                    close()
+                    moveToRelative(-8.291f, -16.584f)
+                    close()
+                }
+            }.build()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -99,6 +290,7 @@ class Advance : AppCompatActivity() {
         finish()
 
     }
+
     fun onBack() {
 
         val i = Intent(applicationContext, Editor::class.java)
@@ -106,7 +298,6 @@ class Advance : AppCompatActivity() {
         finish()
 
     }
-
 
 
     sealed class EditAction {
@@ -233,7 +424,7 @@ class Advance : AppCompatActivity() {
         // State to manage the visibility of the dialog
         var showDialog by remember { mutableStateOf(false) }
         var cancelDialogVisible by remember { mutableStateOf(false) }
-        var saveDialogVisible  by remember { mutableStateOf(false) }
+        var saveDialogVisible by remember { mutableStateOf(false) }
         val selectedColor = remember { mutableStateOf(Color.Black) }
         val ColorWidth = remember { mutableStateOf(4f) }
         var isEraserActive by remember { mutableStateOf(false) }
@@ -242,6 +433,7 @@ class Advance : AppCompatActivity() {
         var isSelectActive by remember { mutableStateOf(false) }
         var isSelected by remember { mutableStateOf(false) }
         var isSelecting by remember { mutableStateOf(false) }
+        var CloneBrush by remember { mutableStateOf(false) }
         val lines = remember {
             mutableStateListOf<Line>()
         }
@@ -249,29 +441,43 @@ class Advance : AppCompatActivity() {
 
         var endOffset by remember { mutableStateOf(Offset.Zero) }
         val image = BitmapObject.bitmap
+        val configuration = LocalConfiguration.current
+        val screenWidthDp = configuration.screenWidthDp.dp
+        val screenHeightDp = configuration.screenHeightDp.dp-200.dp
 
+        // Calculate the scaling factors for width and height
+        val widthScaleFactor = screenWidthDp.value / image.width
+        val heightScaleFactor = screenHeightDp.value / image.height
 
+        // Choose the smaller scaling factor to maintain aspect ratio
+        val scaleFactor = if (widthScaleFactor < heightScaleFactor) widthScaleFactor else heightScaleFactor
+
+        // Calculate the target width and height
+        val targetWidth = (image.width * scaleFactor).toInt()
+        val targetHeight = (image.height * scaleFactor).toInt()
+
+        // Resize the bitmap
+        val imageBitmap = Bitmap.createScaledBitmap(image, targetWidth*2, targetHeight*2, true)
         val density = LocalDensity.current.density
+        val hdp = imageBitmap.height.dp/2
+        val wdp = imageBitmap.width.dp/2
+        val h = (hdp * density).value.toInt()
 
-        val hdp=350.dp
-        val wdp=350.dp
-        val h=(hdp * density).value.toInt()
-
-        val w=(wdp * density).value.toInt()
-        val imageBitmap=Bitmap.createScaledBitmap(image, h, w, false)
+        val w = (wdp * density).value.toInt()
         val isMutable = imageBitmap.isMutable
-        val newBitmap = if (isMutable) imageBitmap else imageBitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val newBitmap =
+            if (isMutable) imageBitmap else imageBitmap.copy(Bitmap.Config.ARGB_8888, true)
         val canvas = Canvas(newBitmap)
-        var mutableBitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
         val undoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
         val redoHistory by remember { mutableStateOf<MutableList<EditAction>>(mutableListOf()) }
         var size = Size.Zero
         var topLeft = Offset.Zero
-        var brightness by remember { mutableStateOf(0f) }
 
         var clonedImage: Bitmap? = null
-        var clone: Bitmap? = null
+        val newConfig = Bitmap.Config.RGB_565 // Example configuration
 
+        val newBit: Bitmap = imageBitmap.copy(newConfig, true)
+        canvas.drawBitmap(newBit, 0f, 0f, null)
         val undo = {
             if (undoHistory.isNotEmpty()) {
                 val undoAction = undoHistory.removeLast()
@@ -310,26 +516,14 @@ class Advance : AppCompatActivity() {
 
 
 
-        Column {
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "Image Editor Application",
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                fontSize = 24.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
+        Column(
+            modifier=Modifier.wrapContentHeight(Alignment.CenterVertically)
+        ) {
 
             Box(
                 modifier = Modifier
-                    .border(1.dp, Color.White)
+                    .border(1.dp, Color.White).align(Alignment.CenterHorizontally)
             ) {
-
-
-
                 val context = LocalContext.current
                 Canvas(
                     modifier = Modifier
@@ -348,14 +542,12 @@ class Advance : AppCompatActivity() {
                                     startOffset = change.position - dragAmount
                                     isSelecting = true
                                 }
-                                if (isCloneActive) {
+                                if (isCloneActive || CloneBrush) {
                                     startOffset = change.position - dragAmount
                                     isSelected = true
                                 }
 
                                 endOffset = change.position
-//                                val canvasWidth = w
-//                                val canvasHeight = h
 
                                 if (isBrushActive) {
                                     if (isInsideCanvas(
@@ -372,13 +564,10 @@ class Advance : AppCompatActivity() {
                                         // Store the complete line as a single action
                                         undoHistory.add(EditAction.AddLine(line))
                                         lines.add(line)
-                                        println("Start: (${line.start.x}, ${line.end.y})")
-                                        println("End: (${line.end.x}, ${line.end.y})")
 
 
                                     }
-//                                    undoHistory.add(EditAction.AddLine(line))
-//                                    lines.add(line)
+
 
                                 } else if (isEraserActive) {
                                     // If the eraser is active, check if any existing lines are within the eraser touch area and remove them
@@ -394,19 +583,20 @@ class Advance : AppCompatActivity() {
                         }
                 ) {
 
-                    val newConfig = Bitmap.Config.RGB_565 // Example configuration
 
-                    val newBit: Bitmap = imageBitmap.copy(newConfig, true)
-                    if(clonedImage!=null) {
-                        canvas.drawBitmap(newBit, 0f, 0f, null)
+                    if (isCloneActive) {
+
+                        if (clonedImage != null) {
+                            canvas.drawBitmap(newBit, 0f, 0f, null)
+                        }
                     }
+
                     drawImage(
-                        image = imageBitmap.asImageBitmap(),
+                        image = newBitmap.asImageBitmap(),
                         topLeft = Offset.Zero
                     )
 
-                    if (isSelecting && isSelectActive)
-                    {
+                    if (isSelecting && isSelectActive) {
                         topLeft = Offset(
                             x = minOf(startOffset.x, endOffset.x),
                             y = minOf(startOffset.y, endOffset.y)
@@ -427,23 +617,28 @@ class Advance : AppCompatActivity() {
                             right = (topLeft.x + size.width).toInt()
                             bottom = (topLeft.y + size.height).toInt()
                         }
-                        val selectedBitmap = Bitmap.createBitmap(imageBitmap, rect.left, rect.top, rect.width(), rect.height())
+                        val selectedBitmap = Bitmap.createBitmap(
+                            imageBitmap,
+                            rect.left,
+                            rect.top,
+                            rect.width(),
+                            rect.height()
+                        )
                         clonedImage = selectedBitmap
-
-
 
 
                     }
 
-                    if(isSelected && isCloneActive)
-                    {
-
+                    if (isSelected && (isCloneActive || CloneBrush)) {
 
 
                         clonedImage?.let { image ->
-                            val offset = Offset(startOffset.x+image.width, startOffset.y+image.height)
-                            if(isInsideCanvas(startOffset, w, h) && isInsideCanvas(offset, w, h)) {
+                            val newbitmap: Bitmap = image.copy(newConfig, true)
+                            val offset =
+                                Offset(startOffset.x + image.width, startOffset.y + image.height)
+                            if (isInsideCanvas(startOffset, w, h) && isInsideCanvas(offset, w, h)) {
                                 drawImage(image.asImageBitmap(), topLeft = startOffset)
+                                canvas.drawBitmap(newbitmap, startOffset.x, startOffset.y, null)
 //                            canvas.drawBitmap(image, startOffset.x, startOffset.y, null)
                             }
 //}
@@ -453,27 +648,23 @@ class Advance : AppCompatActivity() {
 
 
 
-                        clonedImage?.let { image ->
-                            val offset = Offset(startOffset.x+image.width, startOffset.y+image.height)
-                            val newbitmap: Bitmap = image.copy(newConfig, true)
-                            println("we did it")
-                            if(isInsideCanvas(startOffset, w, h) && isInsideCanvas(offset, w, h)) {
-                                canvas.drawBitmap(newbitmap, startOffset.x, startOffset.y, null)
-                            }
-
-                        }
+//                        clonedImage?.let { image ->
+//                            val offset =
+//                                Offset(startOffset.x + image.width, startOffset.y + image.height)
+//
+//                            println("we did it")
+//                            if (isInsideCanvas(startOffset, w, h) && isInsideCanvas(offset, w, h)) {
+//
+//                            }
+//
+//                        }
                         println("The Offset is: $startOffset")
 
 
-
-
                     }
-                    if(clonedImage==null)
-                    {
+                    if (clonedImage == null) {
                         println("NICEEE!!")
-                    }
-                    else
-                    {
+                    } else {
                         println("NICE")
                     }
 
@@ -491,23 +682,46 @@ class Advance : AppCompatActivity() {
                             cap = StrokeCap.Round
                         )
                     }
+//                    lines.forEach { line ->
+//                        val paint = Paint().apply {
+//                            color = line.color.toArgb() // Set the color of the lines
+//
+//                            val width = line.strokeWidth.value * density
+//                            strokeWidth = width // Set the stroke width of the lines
+//                        }
+//                        canvas.drawLine(
+//                            line.start.x,
+//                            line.start.y,
+//                            line.end.x,
+//                            line.end.y,
+//                            paint
+//                        )
+//                    }
 
 
                 }
 
 
-
-
             }
+        }
+        Column (verticalArrangement = Arrangement.Bottom){
+
             Spacer(modifier = Modifier.height(16.dp))
-            Row {
+            Row(
+                //horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
+                    .padding(20.dp)
+                    .horizontalScroll(rememberScrollState())
+            ) {
                 IconButton(
                     onClick = {
+
                         showDialog = true
                         isBrushActive = true
                         isEraserActive = false
-                        isCloneActive=false
-                        isSelectActive=false
+                        isCloneActive = false
+                        isSelectActive = false
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 ) {
@@ -516,11 +730,14 @@ class Advance : AppCompatActivity() {
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
                     onClick = {
+                        canvas.drawBitmap(newBit, 0f, 0f, null)
+
                         isEraserActive = true
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=false
-                        isSelectActive=false
+                        isCloneActive = false
+                        isSelectActive = false
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 ) {
@@ -533,8 +750,9 @@ class Advance : AppCompatActivity() {
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=false
-                        isSelectActive=false
+                        isCloneActive = false
+                        isSelectActive = false
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 ) {
@@ -543,7 +761,7 @@ class Advance : AppCompatActivity() {
                         contentDescription = "Undo Icon",
                         tint = Color.White,
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(50.dp)
                             .rotate(180f)
                     )
                 }
@@ -556,8 +774,9 @@ class Advance : AppCompatActivity() {
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=false
-                        isSelectActive=false
+                        isCloneActive = false
+                        isSelectActive = false
+                        CloneBrush=false
                         redo()
                     },
                     modifier = Modifier.border(1.dp, Color.White)
@@ -566,90 +785,124 @@ class Advance : AppCompatActivity() {
                         imageVector = Icons.Filled.Refresh,
                         contentDescription = "Redo Icon",
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(100.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
-                    onClick={
+                    onClick = {
                         lines.clear()
+                        canvas.drawBitmap(newBit, 0f, 0f, null)
                         undoHistory.clear()
                         redoHistory.clear()
-                        isSelecting=false
+                        isSelecting = false
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=false
-                        isSelectActive=true
+                        isCloneActive = false
+                        isSelectActive = true
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 )
                 //selection icon
                 {
                     Icon(
-                        imageVector=Icons.Filled.PlayArrow,
-                        contentDescription = "Select Icon",
-                        tint=Color.White,
-                        modifier=Modifier.size(32.dp)
+                        imageVector = rememberArrowSelectorTool(),
+                        contentDescription = "Save Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(100.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
                 IconButton(
-                    onClick={
+                    onClick = {
                         lines.clear()
+                        val newConfig = Bitmap.Config.RGB_565 // Example configuration
+
+                        val newBit: Bitmap = imageBitmap.copy(newConfig, true)
+                        canvas.drawBitmap(newBit, 0f, 0f, null)
                         redoHistory.clear()
                         undoHistory.clear()
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=true
-                        isSelectActive=false
-                        isSelected=false
+                        isCloneActive = true
+                        isSelectActive = false
+                        isSelected = false
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 )
                 //clone icon
                 {
                     Icon(
-                        imageVector=Icons.Filled.AddCircle,
-                        contentDescription = "Clone Icon",
-                        tint=Color.White,
-                        modifier=Modifier.size(32.dp)
+                        imageVector = rememberContentCopy(),
+                        contentDescription = "back Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(100.dp)
                     )
                 }
-
-            }
-            Spacer(modifier = Modifier.height(20.dp)) // Add space between icons
-            Row{
+                Spacer(modifier = Modifier.width(16.dp))
                 IconButton(
                     onClick = {
-                        lines.forEach{
-                                line ->
+                        isEraserActive = false
+                        isBrushActive = false
+                        showDialog = false
+                        isCloneActive = false
+                        isSelectActive = false
+                        cancelDialogVisible = false
+                        CloneBrush=true
+                    },
+                    modifier = Modifier.border(1.dp, Color.White)
+                )
+                //modifier = Modifier.weight(0.5f).
+                //background(color=Color.Gray).padding(2.dp))
+                {
+                    Icon(
+                        imageVector =  rememberBrushIcon(),
+                        contentDescription = "brushcloning",
+                        tint = Color.White,
+                        modifier = Modifier.size(100.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
+                IconButton(
+                    onClick = {
+                        lines.forEach { line ->
                             val paint = Paint().apply {
                                 color = line.color.toArgb() // Set the color of the lines
 
-                                val width=line.strokeWidth.value * density
+                                val width = line.strokeWidth.value * density
                                 strokeWidth = width // Set the stroke width of the lines
                             }
-                            canvas.drawLine(line.start.x, line.start.y, line.end.x, line.end.y, paint)
+                            canvas.drawLine(
+                                line.start.x,
+                                line.start.y,
+                                line.end.x,
+                                line.end.y,
+                                paint
+                            )
                         }
+
                         onSavedBack(newBitmap)
 
-//
+
 //                        saveDialogVisible = true
-//                        isEraserActive = false
-//                        isBrushActive = false
-//                        showDialog = false
-//                        isCloneActive=false
-//                        isSelectActive=false
+                        isEraserActive = false
+                        isBrushActive = false
+                        showDialog = false
+                        isCloneActive=false
+                        isSelectActive=false
+                        CloneBrush=false
                     },
                     modifier = Modifier.border(1.dp, Color.White)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Check,
+                        imageVector = Icons.Filled.Done,
                         contentDescription = "Save Icon",
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(100.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp)) // Add space between icons
@@ -658,11 +911,14 @@ class Advance : AppCompatActivity() {
                         isEraserActive = false
                         isBrushActive = false
                         showDialog = false
-                        isCloneActive=false
-                        isSelectActive=false
-                        cancelDialogVisible = true
+                        isCloneActive = false
+                        isSelectActive = false
+                        cancelDialogVisible = false
+                        CloneBrush=false
+                        onBack()
                     },
-                    modifier = Modifier.border(1.dp, Color.White))
+                    modifier = Modifier.border(1.dp, Color.White)
+                )
                 //modifier = Modifier.weight(0.5f).
                 //background(color=Color.Gray).padding(2.dp))
                 {
@@ -670,12 +926,22 @@ class Advance : AppCompatActivity() {
                         imageVector = Icons.Filled.Clear,
                         contentDescription = "back Icon",
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(100.dp)
                     )
                 }
 
-            }
 
+            }
+//            Row {
+//
+//
+//            }
+//            Spacer(modifier = Modifier.height(20.dp)) // Add space between icons
+//            Row {
+//
+//
+//
+//            }
 
 
             // Show dialog when showDialog is true
@@ -736,16 +1002,6 @@ class Advance : AppCompatActivity() {
                                 saveDialogVisible = false
 
                                 println("SOMETHING")
-
-
-
-                                // Draw the original bitmap onto the canvas using the paint with saturation adjustment
-//
-
-
-
-
-
 //                                onSavedBack(newBitmap)
                             }
                         ) {
@@ -768,24 +1024,11 @@ class Advance : AppCompatActivity() {
 
     }
 
-//    @Composable
-//    fun ResizedBitmap(bitmap: Bitmap) {
-//        val context = LocalContext.current
-//        val screenWidth = Resources.getSystem().displayMetrics.widthPixels
-//        val density = LocalDensity.current.density
-//        val scaledWidth = (screenWidth / density).dp
-//        Image(
-//            bitmap = bitmap.asImageBitmap(),
-//            contentDescription = null,
-//            modifier = Modifier.width(scaledWidth),
-//            contentScale = ContentScale.Fit
-//        )
-//    }
 
     @Composable
     fun BrushIcon(selectedColor: MutableState<Color>, brushWidth: Float) {
         val color = selectedColor.value
-        val iconSize = 32.dp
+        val iconSize = 100.dp
 
         val brushWidthDp = with(LocalDensity.current) { brushWidth.dp }
 
@@ -816,35 +1059,10 @@ class Advance : AppCompatActivity() {
             imageVector = Icons.Default.Create,
             contentDescription = "Eraser Icon",
             tint = Color.White,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(100.dp)
         )
     }
 
-    @Composable
-    fun SaveIcon() {
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Save Icon",
-            tint = Color.White,
-            modifier = Modifier.size(32.dp)
-        )
-    }
 
-    private fun overlay(bmp1: Bitmap, bmp2: Bitmap): Bitmap {
-        val bmOverlay = Bitmap.createBitmap(bmp1.getWidth(), bmp1.getHeight(), bmp1.getConfig())
-        val canvas = Canvas(bmOverlay)
-        canvas.drawBitmap(bmp1, Matrix(), null)
-        canvas.drawBitmap(bmp2, Matrix(), null)
-        return bmOverlay
-    }
 
-    @Composable
-    fun BackIcon() {
-        Icon(
-            imageVector = Icons.Default.Close,
-            contentDescription = "Save Icon",
-            tint = Color.White,
-            modifier = Modifier.size(32.dp)
-        )
-    }
 }
