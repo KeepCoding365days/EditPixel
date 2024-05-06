@@ -589,7 +589,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustBrightness (ImgBitmap,brightness)
                             },
-                            valueRange = -255f..255f,modifier = Modifier)
+                            valueRange = 0f..255f,modifier = Modifier)
 
                         Text(text=String.format("%.2f",brightness),modifier=Modifier,color=Color.LightGray)
                     }
@@ -605,7 +605,7 @@ fun AdjustBrightness(source: Bitmap, brightness: Float): Bitmap {
                             onValueChangeFinished = {
                                 composer_bitmap=AdjustContrast (ImgBitmap,contrast)
                             },
-                            valueRange = 0f..10f, modifier = Modifier)
+                            valueRange = 0f..255f, modifier = Modifier)
 
                         Text(text=String.format("%.2f",contrast),modifier=Modifier,color=Color.LightGray)
                     }
