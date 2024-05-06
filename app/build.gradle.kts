@@ -86,9 +86,6 @@ dependencies {
 
     implementation("com.vanniktech:android-image-cropper:4.5.0")
     implementation ("androidx.compose.ui:ui:1.6.6")
-
-
-    implementation ("com.quickbirdstudios:opencv:4.5.0")
-
+    
 
 }
