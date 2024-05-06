@@ -15,7 +15,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -149,21 +151,6 @@ class Advance : AppCompatActivity() {
                 }
             }.build()
         }
-    }
-
-    private fun path(
-        fill: SolidColor,
-        fillAlpha: Float,
-        stroke: Nothing?,
-        strokeAlpha: Float,
-        strokeLineWidth: Float,
-        strokeLineCap: StrokeCap,
-        strokeLineJoin: Any,
-        strokeLineMiter: Float,
-        pathFillType: Any,
-        function: () -> Unit
-    ) {
-
     }
     @Composable
     fun rememberBrushIcon(): ImageVector {
@@ -407,7 +394,6 @@ class Advance : AppCompatActivity() {
         )
     }
 
-
     private fun Offset.distanceTo(other: Offset): Float {
         val dx = other.x - x
         val dy = other.y - y
@@ -457,10 +443,10 @@ class Advance : AppCompatActivity() {
         val targetHeight = (image.height * scaleFactor).toInt()
 
         // Resize the bitmap
-        val imageBitmap = Bitmap.createScaledBitmap(image, targetWidth*2, targetHeight*2, true)
+        val imageBitmap = Bitmap.createScaledBitmap(image, targetWidth*3, targetHeight*3, true)
         val density = LocalDensity.current.density
-        val hdp = imageBitmap.height.dp/2
-        val wdp = imageBitmap.width.dp/2
+        val hdp = imageBitmap.height.dp/3
+        val wdp = imageBitmap.width.dp/3
         val h = (hdp * density).value.toInt()
 
         val w = (wdp * density).value.toInt()
@@ -1064,5 +1050,5 @@ class Advance : AppCompatActivity() {
     }
 
 
-//
+
 }
