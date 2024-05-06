@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +19,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -68,6 +71,7 @@ import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class ProjectGallery : AppCompatActivity() {
@@ -111,10 +115,12 @@ class ProjectGallery : AppCompatActivity() {
         }
 
     }
-    fun check_permission_cam() {
+    fun check_permission_cam():Boolean {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+            return false
         }
+        return true
     }
 
 
@@ -130,17 +136,43 @@ class ProjectGallery : AppCompatActivity() {
     }
     suspend fun savetoApp(list:List<Uri>){
         Log.d(TAG,"save function called")
-        for( path in  list){
-            Log.d(TAG,"Inside loop")
-            val bitmap:Bitmap=ExtractBitmap(path)
-            Log.d(TAG,"saveImagecalled")
-            saveImageToExternalStorage(applicationContext,bitmap,path.toString());
+        CoroutineScope(Dispatchers.IO).launch {
+            for (path in list) {
+                Log.d(TAG, "Inside loop")
+                val bitmap: Bitmap = ExtractBitmap(path)
+                Log.d(TAG, "saveImagecalled")
+                saveImageToExternalStorage(applicationContext, bitmap, path.toString());
+                Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
+            }
+            withContext(Dispatchers.Main) {
+                callback();
+            }
         }
     }
     suspend fun savetoApp(uri: Uri){
-        val bitmap=ExtractBitmap(uri)
-        saveImageToExternalStorage(applicationContext,bitmap,"cam")
+        CoroutineScope(Dispatchers.IO).launch {
+            val bitmap = ExtractBitmap(uri)
+            saveImageToExternalStorage(applicationContext, bitmap, "cam")
+            withContext(Dispatchers.Main){
+                callback();
+            }
+            Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
+        }
     }
+
+    private fun callback() {
+        setContent(){
+            EditPixelTheme {
+                Surface(
+                    modifier = Modifier,
+                    color= Color.DarkGray
+                ) {
+                    Gallery(project_name)
+                }
+            }
+        }
+    }
+
     fun ProjectPage(){
         val i=Intent(applicationContext,ProjectList::class.java)
         startActivity(i)
@@ -156,10 +188,13 @@ class ProjectGallery : AppCompatActivity() {
     }
 
     suspend fun ExportFile(uri:Uri){
-        val helper = StorageHelper()
-        Log.d(TAG,"helper called. with uri: "+uri.toString())
-        helper.exportFileToGallery(applicationContext, uri)
-        Log.d(TAG,"helper returned")
+        CoroutineScope(Dispatchers.IO).launch {
+            val helper = StorageHelper()
+            Log.d(TAG, "helper called. with uri: " + uri.toString())
+            helper.exportFileToGallery(applicationContext, uri)
+            Log.d(TAG, "helper returned")
+            Toast.makeText(applicationContext,"Image exported",Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -169,6 +204,9 @@ class ProjectGallery : AppCompatActivity() {
 
         val imagePaths = remember {
             mutableStateListOf<Uri>()
+        }
+        var isLoading by remember {
+            mutableStateOf(false)
         }
         val dir=getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         val temp_uri=FileProvider.getUriForFile(applicationContext,"com.example.editpixel.provider",
@@ -194,8 +232,10 @@ class ProjectGallery : AppCompatActivity() {
         }
         val launcher_cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
+
                 CoroutineScope(Dispatchers.Main).launch {
-                    savetoApp(temp_uri)
+                savetoApp(temp_uri)
+
                     setContent(){
                         EditPixelTheme {
                             Surface(
@@ -207,6 +247,7 @@ class ProjectGallery : AppCompatActivity() {
                         }
                     }
                 }
+                isLoading=false
             }
         }
 
@@ -217,6 +258,17 @@ class ProjectGallery : AppCompatActivity() {
         }
         var ExportBtn by remember {
             mutableStateOf(false)
+        }
+        if (isLoading) {
+            Log.d(TAG,"isLoading true")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
         }
         if(delBtn) {
             AlertDialog(onDismissRequest = { delBtn=false },
@@ -273,7 +325,9 @@ class ProjectGallery : AppCompatActivity() {
             temp=name
         }
             Column(
-                modifier = Modifier.fillMaxSize().background(color = Color.Black),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.Black),
                 horizontalAlignment = Alignment.CenterHorizontally
 
             ) {
@@ -288,9 +342,12 @@ class ProjectGallery : AppCompatActivity() {
                     items(uris) { uri ->
                         //CoroutineScope(Dispatchers.Main).launch {
                         val bitmap = ExtractBitmap(uri)
-                    OutlinedCard(modifier = Modifier.padding(5.dp).background(color = Color.Black)) {
+                    OutlinedCard(modifier = Modifier
+                        .padding(5.dp)
+                        .background(color = Color.Black)) {
                         Column(modifier = Modifier
-                            .fillMaxWidth().background(color = Color.DarkGray),
+                            .fillMaxWidth()
+                            .background(color = Color.DarkGray),
                             horizontalAlignment = Alignment.CenterHorizontally ) {
                             Image(
                                 painter = BitmapPainter(bitmap.asImageBitmap()),
@@ -381,8 +438,17 @@ class ProjectGallery : AppCompatActivity() {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
         SmallFloatingActionButton(
-            onClick = { check_permission_cam()
-                launcher_cam.launch(temp_uri)
+            onClick = {
+
+                CoroutineScope(Dispatchers.Main).launch {
+                val hasPermission = check_permission_cam()
+                if (hasPermission) {
+                    // Launch the camera if permission is granted
+                    launcher_cam.launch(temp_uri)
+                } else {
+                    Toast.makeText(applicationContext,"Can't access camera",Toast.LENGTH_SHORT).show()
+                }
+            }
             },
             modifier = Modifier
                 .padding(16.dp)
