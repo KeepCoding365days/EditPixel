@@ -63,7 +63,7 @@ class StorageHelper {
 
                 }
                 Log.d("IMAGE_SAVE", "Image saved to ${imageFile.absolutePath}")
-                Toast.makeText(context, "Image copy saved", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Image copy saved", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.d(ContentValues.TAG,"can't save file")
                 e.printStackTrace()
@@ -98,7 +98,7 @@ class StorageHelper {
                     inputStream.close()
                 }
                 outputStream!!.close()
-                Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
+        //        Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
             }
         } catch (e: IOException) {
             e.printStackTrace()

@@ -1,23 +1,17 @@
 package com.example.editpixel
 
-import android.content.ContentValues
-import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,9 +43,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import com.example.editpixel.ui.theme.EditPixelTheme
 
 class ProjectList : AppCompatActivity() {
@@ -153,7 +147,7 @@ class ProjectList : AppCompatActivity() {
             bitmap=ExtractBitmap(uri)
         }
         OutlinedCard (modifier = Modifier
-            .padding(10.dp).background(color = Color.Black)
+            .padding(5.dp).background(color = Color.Black)
             .clickable(onClick = {
                 val i = Intent(applicationContext, ProjectGallery::class.java)
                 i.putExtra("project_name", name)
@@ -162,28 +156,28 @@ class ProjectList : AppCompatActivity() {
             })) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.background(color = Color.Black)
+                modifier = Modifier.background(color = Color.DarkGray).fillMaxWidth()
             ) {
-                Box {
-                    Image(
-                        bitmap = bitmap.asImageBitmap(),
-                        contentDescription = null,
-                        Modifier
-                            .size(size = 150.dp)
-                            .padding(10.dp)
-                            .clip(CircleShape)
-                    )
-                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "",tint=Color.White, modifier =
-                    Modifier.clickable (onClick = {
-                        delBtn=true
-
-                    }))
-                }
 
                 Text(
-                    text = name, modifier = Modifier.padding(10.dp), textAlign = TextAlign.Center,color= Color.White,
-                    style = MaterialTheme.typography.displayMedium
+                    text = name, modifier = Modifier.padding(5.dp), textAlign = TextAlign.Center,color= Color.White,
+                    fontFamily = FontFamily.Cursive, style = MaterialTheme.typography.displayMedium
                 )
+
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    Modifier
+                        .size(size = 200.dp)
+                        .padding(5.dp)
+                        .clip(CircleShape)
+                )
+
+                Icon(imageVector = Icons.Filled.Delete, contentDescription = "",tint=Color.White, modifier =
+                Modifier.clickable (onClick = {
+                    delBtn=true
+
+                }).padding(5.dp) )
             }
         }
     }
