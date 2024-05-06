@@ -142,12 +142,14 @@ class ProjectGallery : AppCompatActivity() {
                 val bitmap: Bitmap = ExtractBitmap(path)
                 Log.d(TAG, "saveImagecalled")
                 saveImageToExternalStorage(applicationContext, bitmap, path.toString());
-                Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
+
             }
             withContext(Dispatchers.Main) {
                 callback();
+                Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
             }
         }
+
     }
     suspend fun savetoApp(uri: Uri){
         CoroutineScope(Dispatchers.IO).launch {
@@ -155,9 +157,11 @@ class ProjectGallery : AppCompatActivity() {
             saveImageToExternalStorage(applicationContext, bitmap, "cam")
             withContext(Dispatchers.Main){
                 callback();
+                Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(applicationContext,"Image Added",Toast.LENGTH_SHORT).show()
+
         }
+
     }
 
     private fun callback() {
@@ -193,7 +197,10 @@ class ProjectGallery : AppCompatActivity() {
             Log.d(TAG, "helper called. with uri: " + uri.toString())
             helper.exportFileToGallery(applicationContext, uri)
             Log.d(TAG, "helper returned")
-            Toast.makeText(applicationContext,"Image exported",Toast.LENGTH_SHORT).show()
+
+        }
+        withContext(Dispatchers.Main) {
+            Toast.makeText(applicationContext, "Image exported", Toast.LENGTH_SHORT).show()
         }
     }
 
