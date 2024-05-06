@@ -8,7 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
+import android.os.Environment
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -58,13 +58,17 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.editpixel.ui.theme.EditPixelTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 class ProjectGallery : AppCompatActivity() {
     private var project_name:String=""
@@ -110,19 +114,9 @@ class ProjectGallery : AppCompatActivity() {
     fun check_permission_cam() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
-        } else {
-            launchCamera()
         }
     }
 
-    private fun launchCamera() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (cameraIntent.resolveActivity(packageManager) != null) {
-            startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE)
-        } else {
-            Log.e(TAG, "Camera intent cannot be resolved")
-        }
-    }
 
     fun saveImageToExternalStorage(context: Context, bitmap: Bitmap, filename: String) {
         Log.d(TAG,"Start of save")
@@ -142,6 +136,10 @@ class ProjectGallery : AppCompatActivity() {
             Log.d(TAG,"saveImagecalled")
             saveImageToExternalStorage(applicationContext,bitmap,path.toString());
         }
+    }
+    suspend fun savetoApp(uri: Uri){
+        val bitmap=ExtractBitmap(uri)
+        saveImageToExternalStorage(applicationContext,bitmap,"cam")
     }
     fun ProjectPage(){
         val i=Intent(applicationContext,ProjectList::class.java)
@@ -172,6 +170,10 @@ class ProjectGallery : AppCompatActivity() {
         val imagePaths = remember {
             mutableStateListOf<Uri>()
         }
+        val dir=getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        val temp_uri=FileProvider.getUriForFile(applicationContext,"com.example.editpixel.provider",
+            File.createTempFile("temp_image",".jpg",dir))
+
         val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
             imagePaths.clear()
             imagePaths.addAll(uris)
@@ -192,12 +194,8 @@ class ProjectGallery : AppCompatActivity() {
         }
         val launcher_cam = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success) {
-                // Get the URI of the captured image from the intent
-                val imageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                imagePaths.clear()
-                imagePaths.add(imageUri)
                 CoroutineScope(Dispatchers.Main).launch {
-                    savetoApp(imagePaths)
+                    savetoApp(temp_uri)
                     setContent(){
                         EditPixelTheme {
                             Surface(
@@ -281,7 +279,7 @@ class ProjectGallery : AppCompatActivity() {
             ) {
                 Text(
                     temp, modifier = Modifier.padding(5.dp), color = Color.White,
-                    style = MaterialTheme.typography.displayMedium
+                    fontFamily = FontFamily.Cursive, style = MaterialTheme.typography.displayMedium
                 )
 
                 LazyColumn(modifier = Modifier.padding(10.dp),horizontalAlignment = Alignment.CenterHorizontally) {
@@ -292,7 +290,7 @@ class ProjectGallery : AppCompatActivity() {
                         val bitmap = ExtractBitmap(uri)
                     OutlinedCard(modifier = Modifier.padding(5.dp).background(color = Color.Black)) {
                         Column(modifier = Modifier
-                            .fillMaxWidth().background(color = Color.Black),
+                            .fillMaxWidth().background(color = Color.DarkGray),
                             horizontalAlignment = Alignment.CenterHorizontally ) {
                             Image(
                                 painter = BitmapPainter(bitmap.asImageBitmap()),
@@ -382,20 +380,19 @@ class ProjectGallery : AppCompatActivity() {
         ) {
             Icon(Icons.Filled.Add, "Fap_Add")
         }
-        /*SmallFloatingActionButton(
+        SmallFloatingActionButton(
             onClick = { check_permission_cam()
-                launchCamera()
-
+                launcher_cam.launch(temp_uri)
             },
             modifier = Modifier
                 .padding(16.dp)
                 .offset(
-                    70.dp,
-                    100.dp
+                    0.dp,
+                    LocalConfiguration.current.screenHeightDp.dp - 100.dp
                 )
         ) {
             Icon(painter = painterResource(R.drawable.camera) , "Fap_Cam")
-        }*/
+        }
 
     }
 }
