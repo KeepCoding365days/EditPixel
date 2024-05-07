@@ -1,4 +1,4 @@
-package com.example.editpixel // Replace with your actual package name
+package com.example.editpixel 
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -18,12 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 
 
-// Assuming BitmapObject is a singleton object in your codebase that holds the bitmap and related information.
-//object BitmapObject {
-  //  var bitmap: Bitmap? = null
-  //  var project_name: String? = null
-  //  var file_name: String? = null}
-//
+
 
 class ColourTempActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,15 +71,10 @@ class ColourTempActivity : ComponentActivity() {
     }
 
     private fun ColorMatrix.setTemperature(value: Float) {
-        // Assuming the value ranges from 0.0f (cool) to 100.0f (warm)
-        // You may want to adjust the scaling to suit your specific needs.
+        
         val scale = value / 100f
 
-        // This is a very simple approximation:
-        // - Increase Red and Green channels to add warmth.
-        // - Decrease Blue channel to remove coolness.
-        // The matrix is ordered as {scaleR, 0, 0, 0, 0, 0, scaleG, 0, 0, 0, 0, 0, scaleB, 0, 0, 0, 0, 0, 1, 0}.
-        // This implementation is rudimentary and may not produce perfect results.
+       
         val r = 1f + scale
         val g = 1f + scale * 0.8f // green less affected by temperature
         val b = 1f - scale // blue becomes less prominent with warmth
