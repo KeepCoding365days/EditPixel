@@ -204,7 +204,16 @@ class ProjectGallery : AppCompatActivity() {
         }
     }
 
-
+    @Composable
+    fun loader(){
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color.White)}
+    }
 
     @Composable
     fun Gallery(name: String?){
@@ -230,7 +239,7 @@ class ProjectGallery : AppCompatActivity() {
                             modifier = Modifier,
                             color= Color.DarkGray
                         ) {
-                            Gallery(project_name)
+                            loader()
                         }
                     }
                 }
@@ -249,7 +258,7 @@ class ProjectGallery : AppCompatActivity() {
                                 modifier = Modifier,
                                 color= Color.DarkGray
                             ) {
-                                Gallery(project_name)
+                                loader()
                             }
                         }
                     }
